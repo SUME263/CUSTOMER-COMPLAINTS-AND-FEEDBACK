@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track a Complaint | Civil Service & Defence Force Loans</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="brand">
+    <span class="mark">CS</span>
+    <span class="name">Civil Service & Defence Force Finance<small>Complaints & Feedback Portal</small></span>
+  </a>
+  <nav class="topnav">
+    <a href="track-complaint.html" class="active">Track a complaint</a>
+    <span class="divider"></span>
+    <a href="staff-dashboard.html">Staff sign in</a>
+    <a href="admin-dashboard.html">Admin sign in</a>
+  </nav>
+</header>
+
+<div class="shell narrow">
+  <div class="eyebrow">Track your complaint</div>
+  <h1 style="font-size:2rem;">Where does it stand?</h1>
+  <p style="margin-top:12px;">Enter the reference number you received when you submitted your complaint.</p>
+
+  <form id="track-form" class="panel mt-32" style="display:flex; gap:12px; align-items:flex-end;">
+    <div class="field" style="flex:1; margin-bottom:0;">
+      <label for="ref-input">Reference number</label>
+      <input type="text" id="ref-input" placeholder="e.g. CCF-2026-1042">
+    </div>
+    <button type="submit" class="btn btn-primary">Track</button>
+  </form>
+
+  <div class="hint mt-32">Try <strong>CCF-2026-1041</strong> or <strong>CCF-2026-1035</strong> to see sample results in this prototype.</div>
+
+  <div id="track-not-found" class="panel mt-32 hidden">
+    <h3>We couldn't find that reference</h3>
+    <p style="margin-top:10px;">Double-check the number, or contact your branch if you believe this is an error.</p>
+  </div>
+
+  <div id="track-result" class="panel mt-32 hidden">
+    <div class="flex-between">
+      <div>
+        <div class="eyebrow" id="res-ref">CCF-2026-0000</div>
+        <h2 id="res-category" style="font-size:1.3rem;">Category</h2>
+      </div>
+      <span class="badge" id="res-badge">Open</span>
+    </div>
+    <p style="margin-top:8px; font-size:0.86rem;">Submitted <span id="res-submitted"></span></p>
+
+    <div class="stepper" id="stepper">
+      <div class="step"><div class="bar"></div><div class="label">Open</div></div>
+      <div class="step"><div class="bar"></div><div class="label">In Progress</div></div>
+      <div class="step"><div class="bar"></div><div class="label">Resolved</div></div>
+      <div class="step"><div class="bar"></div><div class="label">Closed</div></div>
+    </div>
+
+    <hr class="section-divider">
+    <h3>Update history</h3>
+    <div id="timeline" class="mt-32"></div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <span>&copy; 2026 Civil Service & Defence Force Finance. Complaints handled under BoZ Directive.</span>
+  <span>Prototype interface — Customer Complaints and Feedback Handling System</span>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>
