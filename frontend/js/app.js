@@ -275,13 +275,90 @@ function initAdminDashboard() {
 
   const user = requireSession('admin');
   if (!user) return;
-  document.querySelectorAll('.current-user-name').forEach(node => { node.textContent = `${user.name} — Administrator`; });
+
+  document.querySelectorAll('.current-user-name').forEach(node => {
+    node.textContent = `${user.name} — Administrator`;
+  });
 
   const signOut = document.getElementById('sign-out');
-  if (signOut) signOut.addEventListener('click', (e) => { e.preventDefault(); clearSession(); window.location.href = 'index.html'; });
+
+  if (signOut) {
+    signOut.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearSession();
+      window.location.href = 'index.html';
+    });
+  }
 
   loadComplianceSummary();
   loadStaffTable();
+  // load compliance handles the threshold displau itself
+  // loadThresholdDisplay();
+
+  const editThresholdsBtn = document.getElementById('edit-thresholds-btn');
+const thresholdsContainer = document.getElementById('thresholds-form');
+const thresholdsForm = document.getElementById('thresholds-form-element');
+  const cancelThresholdsBtn = document.getElementById('cancel-thresholds-btn');
+  const thresholdsError = document.getElementById('thresholds-error');
+
+  if (editThresholdsBtn && thresholdsForm) {
+    editThresholdsBtn.addEventListener('click', async () => {
+      thresholdsError.innerHTML = '';
+
+      try {
+        const settings = await api.getSettings();
+
+        document.getElementById('acknowledge-days').value =
+          settings.acknowledgeDays;
+
+        document.getElementById('resolve-days').value =
+          settings.resolveDays;
+
+        thresholdsContainer.classList.remove('hidden');
+
+      } catch (err) {
+        thresholdsError.textContent = err.message;
+      }
+    });
+  }
+
+  if (cancelThresholdsBtn) {
+    cancelThresholdsBtn.addEventListener('click', () => {
+      thresholdsContainer.classList.add('hidden');
+      thresholdsError.innerHTML = '';
+    });
+  }
+
+  if (thresholdsForm) {
+    thresholdsForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      thresholdsError.innerHTML = '';
+
+      const acknowledgeDays = Number(
+        document.getElementById('acknowledge-days').value
+      );
+
+      const resolveDays = Number(
+        document.getElementById('resolve-days').value
+      );
+
+      try {
+        await api.updateSettings({
+          acknowledgeDays,
+          resolveDays
+        });
+
+        thresholdsContainer.classList.add('hidden');
+
+        await loadComplianceSummary();
+        await loadThresholdDisplay();
+
+      } catch (err) {
+        thresholdsError.textContent = err.message;
+      }
+    });
+  }
 }
 
 async function loadComplianceSummary() {
@@ -308,9 +385,29 @@ async function loadComplianceSummary() {
     barsEl.appendChild(row);
   });
 
-  document.getElementById('acknowledge-threshold').textContent = data.thresholds.acknowledgeDays;
-  document.getElementById('resolve-threshold').textContent = data.thresholds.resolveDays;
+  document.getElementById('acknowledge-days-display').textContent =
+  data.thresholds.acknowledgeDays;
+
+document.getElementById('resolve-days-display').textContent =
+  data.thresholds.resolveDays;
 }
+
+// async function loadThresholdDisplay() {
+//   const acknowledgeDisplay = document.getElementById('acknowledge-days-display');
+//   const resolveDisplay = document.getElementById('resolve-days-display');
+
+//   if (!acknowledgeDisplay || !resolveDisplay) return;
+
+//   try {
+//     const settings = await api.getSettings();
+
+//     acknowledgeDisplay.textContent = settings.acknowledgeDays;
+//     resolveDisplay.textContent = settings.resolveDays;
+//   } catch (err) {
+//     acknowledgeDisplay.textContent = '—';
+//     resolveDisplay.textContent = '—';
+//   }
+// }
 
 async function loadStaffTable() {
   const tbody = document.getElementById('staff-tbody');

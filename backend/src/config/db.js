@@ -57,6 +57,13 @@ db.exec(`
     created_at   TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+    CREATE TABLE IF NOT EXISTS system_settings (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    setting_key TEXT NOT NULL UNIQUE,
+    setting_value TEXT NOT NULL,
+    updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE INDEX IF NOT EXISTS idx_complaints_status ON complaints(status);
   CREATE INDEX IF NOT EXISTS idx_complaints_category ON complaints(category);
   CREATE INDEX IF NOT EXISTS idx_logs_complaint ON complaint_logs(complaint_id);

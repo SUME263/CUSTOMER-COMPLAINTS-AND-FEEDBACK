@@ -6,6 +6,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const complaintsRoutes = require('./src/routes/complaintsRoutes');
 const usersRoutes = require('./src/routes/usersRoutes');
 const reportsRoutes = require('./src/routes/reportsRoutes');
+const settingsRoutes = require('./src/routes/settingsRoutes');
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // 404 for unmatched API routes
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found.' }));

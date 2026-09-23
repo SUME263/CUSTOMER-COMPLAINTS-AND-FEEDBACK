@@ -63,8 +63,20 @@ const api = {
   },
   getComplaint: (id) => apiFetch(`/complaints/${id}`),
   updateComplaint: (id, payload) => apiFetch(`/complaints/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
-  reportSummary: () => apiFetch('/reports/summary'),
+   reportSummary: () => apiFetch('/reports/summary'),
   listUsers: () => apiFetch('/users'),
-  createUser: (payload) => apiFetch('/users', { method: 'POST', body: JSON.stringify(payload) }),
-  updateUser: (id, payload) => apiFetch(`/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  createUser: (payload) => apiFetch('/users', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  }),
+  updateUser: (id, payload) => apiFetch(`/users/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  }),
+
+  getSettings: () => apiFetch('/settings'),
+  updateSettings: (payload) => apiFetch('/settings', {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  }),
 };

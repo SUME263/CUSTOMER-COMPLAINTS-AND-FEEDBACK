@@ -12,8 +12,16 @@ function summary(req, res) {
     .prepare('SELECT category, COUNT(*) AS count FROM complaints GROUP BY category ORDER BY count DESC')
     .all();
 
-  const ackDays = Number(process.env.ACKNOWLEDGE_DAYS || 2);
-  const resolveDays = Number(process.env.RESOLVE_DAYS || 14);
+const getSetting = (key, fallback) => {
+  const row = db
+    .prepare('SELECT setting_value FROM system_settings WHERE setting_key = ?')
+    .get(key);
+
+  return row ? Number(row.setting_value) : fallback;
+};
+
+const ackDays = getSetting('acknowledge_days', 2);
+const resolveDays = getSetting('resolve_days', 14);
 
   // Complaints still Open past the acknowledgement window — a simple
   // regulatory-risk flag for the BoZ directive referenced in the proposal.
