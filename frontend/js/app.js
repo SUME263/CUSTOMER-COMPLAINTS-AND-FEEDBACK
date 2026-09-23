@@ -339,10 +339,152 @@ async function loadStaffTable() {
   });
 }
 
+/* -------- Admin user accounts -------- */
+function initAdminUsers() {
+  const tbody = document.getElementById('users-tbody');
+  if (!tbody) return;
+
+  const user = requireSession('admin');
+  if (!user) return;
+
+  document.querySelectorAll('.current-user-name').forEach(node => {
+    node.textContent = `${user.name} — Administrator`;
+  });
+
+  const formContainer = document.getElementById('form-container');
+  const addBtn = document.getElementById('add-user-btn');
+  const cancelBtn = document.getElementById('cancel-user-btn');
+  const form = document.getElementById('user-form');
+
+  const showError = (container, message) => {
+    container.innerHTML = '';
+    const error = document.createElement('div');
+    error.className = 'form-error';
+    error.style.cssText =
+      'background:#FBEDE0;border:1px solid #B4702F;color:#8F5A24;padding:12px 14px;border-radius:3px;font-size:0.86rem;margin-bottom:20px;';
+    error.textContent = message;
+    container.appendChild(error);
+  };
+
+  async function renderUsers() {
+    try {
+      const { users } = await api.listUsers();
+
+      tbody.innerHTML = '';
+
+      users.forEach(u => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+          <td>${u.name}</td>
+          <td>${u.email}</td>
+          <td style="text-transform:capitalize">${u.role}</td>
+          <td>${u.branch || '—'}</td>
+          <td>
+            <span class="badge ${u.status === 'active' ? 'badge-resolved' : 'badge-closed'}">
+              ${u.status === 'active' ? 'Active' : 'Suspended'}
+            </span>
+          </td>
+          <td>
+            <a href="#"
+               class="toggle-user-status"
+               data-id="${u.id}"
+               data-status="${u.status}"
+               style="font-size:0.82rem;">
+              ${u.status === 'active' ? 'Suspend' : 'Reactivate'}
+            </a>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      tbody.querySelectorAll('.toggle-user-status').forEach(link => {
+        link.addEventListener('click', async e => {
+          e.preventDefault();
+
+          const id = e.target.dataset.id;
+          const currentStatus = e.target.dataset.status;
+          const newStatus =
+            currentStatus === 'active' ? 'suspended' : 'active';
+
+          try {
+            await api.updateUser(id, { status: newStatus });
+            await renderUsers();
+          } catch (err) {
+            showError(
+              document.getElementById('table-error'),
+              err.message
+            );
+          }
+        });
+      });
+
+    } catch (err) {
+      showError(
+        document.getElementById('table-error'),
+        err.message
+      );
+    }
+  }
+
+  addBtn.addEventListener('click', () => {
+    formContainer.classList.remove('hidden');
+    document.getElementById('user-name').focus();
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    form.reset();
+    formContainer.classList.add('hidden');
+    document.getElementById('user-form-error').innerHTML = '';
+  });
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const payload = {
+      name: document.getElementById('user-name').value.trim(),
+      email: document.getElementById('user-email').value.trim(),
+      password: document.getElementById('user-password').value,
+      role: document.getElementById('user-role').value,
+      branch: document.getElementById('user-branch').value.trim() || null
+    };
+
+    try {
+      await api.createUser(payload);
+
+      form.reset();
+      formContainer.classList.add('hidden');
+      document.getElementById('user-form-error').innerHTML = '';
+
+      await renderUsers();
+
+    } catch (err) {
+      showError(
+        document.getElementById('user-form-error'),
+        err.message
+      );
+    }
+  });
+
+  const signOut = document.getElementById('sign-out');
+
+  if (signOut) {
+    signOut.addEventListener('click', e => {
+      e.preventDefault();
+      clearSession();
+      window.location.href = 'index.html';
+    });
+  }
+
+  renderUsers();
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   initRaiseComplaintForm();
   initTrackComplaint();
   initLoginPage();
   initStaffDashboard();
   initAdminDashboard();
+  initAdminUsers();
 });
