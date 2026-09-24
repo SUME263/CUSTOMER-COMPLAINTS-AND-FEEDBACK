@@ -21,19 +21,40 @@
 
 <div class="app-layout">
   <aside class="sidebar">
-    <div class="section-label">Workspace</div>
-    <a href="staff-dashboard.html" class="active">Complaints queue</a>
-    <a href="#" id="my-assigned-cases">My assigned cases</a>
-    <a href="reports.html">Reports</a>
-    <div class="section-label">Account</div>
-    <a href="notification-settings.html">Notification settings</a>
-  </aside>
+  <div class="section-label">Workspace</div>
+  <a href="staff-dashboard.html">Complaints queue</a>
+  <a href="staff-dashboard.html">My assigned cases</a>
+
+  <a href="staff-dashboard.html#notifications" class="notification-sidebar-link">
+    <span>Notifications</span>
+    <span
+      id="sidebar-notification-count"
+      style="
+        font-size:0.72rem;
+        min-width:20px;
+        text-align:center;
+        padding:2px 6px;
+        border-radius:10px;
+        background:var(--ink);
+        color:white;
+      "
+    >
+      0
+    </span>
+  </a>
+
+  <a href="reports.html">Reports</a>
+
+  <div class="section-label">Account</div>
+
+  <a href="notification-settings.html">
+    Notification settings
+  </a>
+</aside>
 
   <main class="main-pane">
     <div class="panel mt-32" id="notifications-panel">
-
       <div class="panel-header">
-
         <div>
           <div class="panel-title">
             Notifications
@@ -46,34 +67,31 @@
 
         <div
           id="notification-count"
-          style="
-            font-size:0.82rem;
-            color:var(--ink-soft);
-          "
+          style="font-size:0.82rem; color:var(--ink-soft);"
         >
           0 unread
         </div>
-
       </div>
 
-
-      <div id="notifications-list">
+      <!-- for compact scrolling area -->
+      <div
+        id="notifications-list"
+        style="
+          max-height:150px;
+          overflow-y:auto;
+          padding-right:8px;
+        "
+      >
 
         <p
-          style="
-            font-size:0.86rem;
-            color:var(--ink-soft);
-          "
+          style=" font-size:0.86rem; color:var(--ink-soft);"
         >
           Loading notifications...
         </p>
-
       </div>
-
     </div>
 
-
-    <div class="flex-between">
+    <div class="flex-between mt-32">
       <div>
         <div class="eyebrow">Complaints queue</div>
         <h2>All complaints</h2>

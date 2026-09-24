@@ -186,6 +186,21 @@ function update(req, res) {
     }
 
     if (
+      newStatus &&
+      newStatus !== existing.status &&
+      existing.assigned_to
+    ) {
+      createNotification({
+        userId: Number(existing.assigned_to),
+        complaintId: existing.id,
+        type: 'status_update',
+        title: 'Complaint status updated',
+        message: `${existing.reference} has been moved to ${newStatus}.`,
+        settingKey: 'statusUpdates',
+      });
+    }
+
+    if (
       assignedTo &&
       Number(assignedTo) !== Number(existing.assigned_to)
     ) {

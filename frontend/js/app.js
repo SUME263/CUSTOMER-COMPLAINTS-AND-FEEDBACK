@@ -14,6 +14,9 @@ const CATEGORIES = [
 
 const STATUSES = ['Open', 'In Progress', 'Resolved', 'Closed'];
 
+// to avoid multiple timers being created every time mark as read is clicked
+let notificationRefreshTimer = null;
+
 function statusBadgeClass(status) {
   return {
     'Open': 'badge-open',
@@ -98,12 +101,21 @@ async function initNotifications() {
 
   const countEl = document.getElementById('notification-count');
 
+  const sidebarCountEl =
+  document.getElementById('sidebar-notification-count');
+
   try {
     const notifications = await api.getNotifications();
     const unread = await api.getUnreadNotificationCount();
 
     countEl.textContent =
       `${unread.count} unread`;
+
+    if (sidebarCountEl) {
+      sidebarCountEl.textContent = unread.count;
+      sidebarCountEl.style.display =
+        unread.count > 0 ? 'inline-block' : 'none';
+    }
 
     if (!notifications.length) {
       notificationList.innerHTML = `
@@ -117,7 +129,8 @@ async function initNotifications() {
 
     notificationList.innerHTML = '';
 
-    notifications.forEach(notification => {
+    // render the first 5 notifications in the list
+    notifications.slice(0, 5).forEach(notification => {
       const item = document.createElement('div');
 
       item.style.padding = '14px 0';
@@ -232,6 +245,14 @@ async function initNotifications() {
       </p>
     `;
   }
+
+  // to refresh after 30 seconds because new notifications only show after reload
+  if (notificationRefreshTimer) {
+    clearTimeout(notificationRefreshTimer);
+  }
+
+  notificationRefreshTimer =
+    setTimeout(initNotifications, 30000);
 }
 
 /* -------- Track complaint page -------- */
@@ -483,7 +504,7 @@ async function openDetail(id) {
   };
 }
 
-/* -------- Admin dashboard -------- */
+// admin dashboard
 function initAdminDashboard() {
   const el = document.getElementById('compliance-summary');
   if (!el) return;
@@ -607,23 +628,6 @@ document.getElementById('resolve-days-display').textContent =
   data.thresholds.resolveDays;
 }
 
-// async function loadThresholdDisplay() {
-//   const acknowledgeDisplay = document.getElementById('acknowledge-days-display');
-//   const resolveDisplay = document.getElementById('resolve-days-display');
-
-//   if (!acknowledgeDisplay || !resolveDisplay) return;
-
-//   try {
-//     const settings = await api.getSettings();
-
-//     acknowledgeDisplay.textContent = settings.acknowledgeDays;
-//     resolveDisplay.textContent = settings.resolveDays;
-//   } catch (err) {
-//     acknowledgeDisplay.textContent = '—';
-//     resolveDisplay.textContent = '—';
-//   }
-// }
-
 async function loadStaffTable() {
   const tbody = document.getElementById('staff-tbody');
   if (!tbody) return;
@@ -651,7 +655,7 @@ async function loadStaffTable() {
   });
 }
 
-/* -------- Admin user accounts -------- */
+// admin user accounts
 function initAdminUsers() {
   const tbody = document.getElementById('users-tbody');
   if (!tbody) return;
