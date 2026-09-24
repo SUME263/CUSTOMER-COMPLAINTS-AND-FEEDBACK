@@ -42,6 +42,17 @@ db.exec(`
     updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+    CREATE TABLE IF NOT EXISTS notifications (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    complaint_id  INTEGER REFERENCES complaints(id) ON DELETE CASCADE,
+    type          TEXT NOT NULL,
+    title         TEXT NOT NULL,
+    message       TEXT NOT NULL,
+    is_read       INTEGER NOT NULL DEFAULT 0,
+    created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS complaints (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     reference      TEXT NOT NULL UNIQUE,
@@ -77,6 +88,8 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_complaints_status ON complaints(status);
   CREATE INDEX IF NOT EXISTS idx_complaints_category ON complaints(category);
   CREATE INDEX IF NOT EXISTS idx_logs_complaint ON complaint_logs(complaint_id);
+  CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+  CREATE INDEX IF NOT EXISTS idx_notifications_unread ON notifications(user_id, is_read);
 `);
 
 module.exports = db;

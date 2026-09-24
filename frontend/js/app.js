@@ -86,6 +86,154 @@ function initRaiseComplaintForm() {
   });
 }
 
+// for notifications on the staff dashboard 
+async function initNotifications() {
+  const notificationList = document.getElementById('notifications-list');
+
+  if (!notificationList) return;
+
+  const user = getUser();
+
+  if (!user || !getToken()) return;
+
+  const countEl = document.getElementById('notification-count');
+
+  try {
+    const notifications = await api.getNotifications();
+    const unread = await api.getUnreadNotificationCount();
+
+    countEl.textContent =
+      `${unread.count} unread`;
+
+    if (!notifications.length) {
+      notificationList.innerHTML = `
+        <p style="font-size:0.86rem; color:var(--ink-soft);">
+          You have no notifications.
+        </p>
+      `;
+
+      return;
+    }
+
+    notificationList.innerHTML = '';
+
+    notifications.forEach(notification => {
+      const item = document.createElement('div');
+
+      item.style.padding = '14px 0';
+      item.style.borderBottom = '1px solid var(--line)';
+
+      if (!notification.isRead) {
+        item.style.fontWeight = '600';
+      }
+
+      item.innerHTML = `
+        <div style="display:flex; justify-content:space-between; gap:20px;">
+
+          <div>
+            <div>
+              ${notification.title}
+            </div>
+
+            <div
+              style="
+                font-size:0.84rem;
+                font-weight:400;
+                color:var(--ink-soft);
+                margin-top:4px;
+              "
+            >
+              ${notification.message}
+            </div>
+
+            ${
+              notification.reference
+                ? `
+                  <div
+                    style="
+                      font-size:0.78rem;
+                      color:var(--ink-soft);
+                      margin-top:6px;
+                    "
+                  >
+                    ${notification.reference}
+                  </div>
+                `
+                : ''
+            }
+          </div>
+
+          <div style="text-align:right; flex-shrink:0;">
+
+            <div
+              style="
+                font-size:0.76rem;
+                color:var(--ink-soft);
+              "
+            >
+              ${formatDate(notification.createdAt)}
+            </div>
+
+            ${
+              !notification.isRead
+                ? `
+                  <button
+                    type="button"
+                    class="btn btn-secondary notification-read-btn"
+                    data-id="${notification.id}"
+                    style="margin-top:8px;"
+                  >
+                    Mark as read
+                  </button>
+                `
+                : ''
+            }
+
+          </div>
+
+        </div>
+      `;
+
+      notificationList.appendChild(item);
+    });
+
+    document
+      .querySelectorAll('.notification-read-btn')
+      .forEach(button => {
+        button.addEventListener('click', async () => {
+
+          const id = button.dataset.id;
+
+          try {
+            await api.markNotificationAsRead(id);
+
+            await initNotifications();
+
+          } catch (error) {
+            console.error(
+              'Could not mark notification as read:',
+              error
+            );
+          }
+
+        });
+      });
+
+  } catch (error) {
+
+    console.error(
+      'Could not load notifications:',
+      error
+    );
+
+    notificationList.innerHTML = `
+      <p class="form-error">
+        ${error.message}
+      </p>
+    `;
+  }
+}
+
 /* -------- Track complaint page -------- */
 function initTrackComplaint() {
   const form = document.getElementById('track-form');
@@ -856,6 +1004,5 @@ document.addEventListener('DOMContentLoaded', function () {
   initAdminUsers();
   initReportsPage();
   initNotificationSettings();
+  initNotifications();
 });
-
-

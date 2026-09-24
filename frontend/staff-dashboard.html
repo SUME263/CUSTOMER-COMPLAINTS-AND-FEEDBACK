@@ -30,6 +30,49 @@
   </aside>
 
   <main class="main-pane">
+    <div class="panel mt-32" id="notifications-panel">
+
+      <div class="panel-header">
+
+        <div>
+          <div class="panel-title">
+            Notifications
+          </div>
+
+          <div class="panel-subtitle">
+            Recent complaint-related notifications.
+          </div>
+        </div>
+
+        <div
+          id="notification-count"
+          style="
+            font-size:0.82rem;
+            color:var(--ink-soft);
+          "
+        >
+          0 unread
+        </div>
+
+      </div>
+
+
+      <div id="notifications-list">
+
+        <p
+          style="
+            font-size:0.86rem;
+            color:var(--ink-soft);
+          "
+        >
+          Loading notifications...
+        </p>
+
+      </div>
+
+    </div>
+
+
     <div class="flex-between">
       <div>
         <div class="eyebrow">Complaints queue</div>

@@ -90,4 +90,15 @@ const api = {
       method: 'PATCH',
       body: JSON.stringify(payload)
   }),
+
+  getNotifications: () =>
+    apiFetch('/notifications'),
+
+  getUnreadNotificationCount: () =>
+    apiFetch('/notifications/unread-count'),
+
+  markNotificationAsRead: (id) =>
+    apiFetch(`/notifications/${id}/read`, {
+      method: 'PATCH'
+    }),
 };

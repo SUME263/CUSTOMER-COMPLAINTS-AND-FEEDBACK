@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { createNotification, } = require('../utils/notificationService');
 const { generateReference } = require('../utils/reference');
 
 const VALID_STATUSES = ['Open', 'In Progress', 'Resolved', 'Closed'];
@@ -182,6 +183,20 @@ function update(req, res) {
       Number(assignedTo) !== Number(existing.assigned_to)
     ) {
       logNote = `Assigned to ${assignmentName}. ${logNote}`;
+    }
+
+    if (
+      assignedTo &&
+      Number(assignedTo) !== Number(existing.assigned_to)
+    ) {
+      createNotification({
+        userId: Number(assignedTo),
+        complaintId: existing.id,
+        type: 'assignment',
+        title: 'Complaint assigned to you',
+        message: `${existing.reference} has been assigned to you for review.`,
+        settingKey: 'complaintAssignments',
+      });
     }
 
     db.prepare(
