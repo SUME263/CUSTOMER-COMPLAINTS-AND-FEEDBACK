@@ -61,8 +61,34 @@ function create(req, res) {
   });
 
   const id = run();
-  const row = db.prepare('SELECT * FROM complaints WHERE id = ?').get(id);
-  res.status(201).json({ complaint: serializeComplaint(row) });
+
+  const row = db
+    .prepare('SELECT * FROM complaints WHERE id = ?')
+    .get(id);
+
+  const activeStaff = db
+    .prepare(`
+      SELECT id
+      FROM users
+      WHERE role = 'staff'
+        AND status = 'active'
+    `)
+    .all();
+
+  activeStaff.forEach(staff => {
+    createNotification({
+      userId: staff.id,
+      complaintId: id,
+      type: 'new_complaint',
+      title: 'New complaint received',
+      message: `${reference} has been submitted and is awaiting review.`,
+      settingKey: 'newComplaints',
+    });
+  });
+
+  res.status(201).json({
+    complaint: serializeComplaint(row),
+  });
 }
 
 /** GET /api/complaints/track/:reference — public. Track by reference number. */
