@@ -76,7 +76,7 @@ function trackByReference(req, res) {
 
 /** GET /api/complaints — staff/admin. List with optional filters. */
 function list(req, res) {
-  const { status, category } = req.query;
+  const { status, category, assignedTo } = req.query;
   let sql = `
     SELECT c.*, u.name AS assigned_name
     FROM complaints c
@@ -84,14 +84,22 @@ function list(req, res) {
     WHERE 1 = 1
   `;
   const params = [];
+
   if (status && status !== 'all') {
     sql += ' AND c.status = ?';
     params.push(status);
   }
+
   if (category && category !== 'all') {
     sql += ' AND c.category = ?';
     params.push(category);
   }
+  
+  if (assignedTo && assignedTo !== 'all') {
+    sql += ' AND c.assigned_to = ?';
+    params.push(Number(assignedTo));
+  }
+
   sql += ' ORDER BY c.submitted_at DESC';
 
   const rows = db.prepare(sql).all(...params);

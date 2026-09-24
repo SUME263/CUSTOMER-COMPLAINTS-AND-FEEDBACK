@@ -199,10 +199,15 @@ if (assignedSelect) {
     catFilter.appendChild(opt);
   });
 
-  async function render() {
+  async function render(assignedTo = null) {
     const status = document.getElementById('filter-status').value;
     const category = document.getElementById('filter-category').value;
-    const { complaints } = await api.listComplaints({ status, category });
+
+    const { complaints } = await api.listComplaints({
+      status,
+      category,
+      assignedTo
+    });
 
     tbody.innerHTML = '';
     document.getElementById('result-count').textContent = `${complaints.length} complaint${complaints.length === 1 ? '' : 's'}`;
@@ -228,6 +233,47 @@ if (assignedSelect) {
 
   document.getElementById('filter-status').addEventListener('change', render);
   document.getElementById('filter-category').addEventListener('change', render);
+
+  const myAssignedCases = document.getElementById('my-assigned-cases');
+
+  // if (myAssignedCases) {
+  //   myAssignedCases.addEventListener('click', (e) => {
+  //     e.preventDefault();
+
+  //     document.getElementById('filter-status').value = 'all';
+  //     document.getElementById('filter-category').value = 'all';
+
+  //     render(getUser().id);
+  //   });
+  // }
+
+  const complaintsQueue = document.querySelector('.sidebar a.active');
+
+  if (myAssignedCases && complaintsQueue) {
+    myAssignedCases.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      complaintsQueue.classList.remove('active');
+      myAssignedCases.classList.add('active');
+
+      document.getElementById('filter-status').value = 'all';
+      document.getElementById('filter-category').value = 'all';
+
+      render(getUser().id);
+    });
+
+    complaintsQueue.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      myAssignedCases.classList.remove('active');
+      complaintsQueue.classList.add('active');
+
+      document.getElementById('filter-status').value = 'all';
+      document.getElementById('filter-category').value = 'all';
+
+      render();
+    });
+  }
 
   render();
   window.__renderStaffTable = render;
