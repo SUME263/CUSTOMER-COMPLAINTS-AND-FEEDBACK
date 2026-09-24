@@ -731,6 +731,41 @@ async function initReportsPage() {
       });
     }
 
+    const overdueResolutionReport =
+      document.getElementById('overdue-resolution-report');
+
+    if (!data.overdueResolution.length) {
+      overdueResolutionReport.innerHTML =
+        '<p style="font-size:0.86rem; color:var(--ink-soft);">No overdue resolution cases.</p>';
+    } else {
+      overdueResolutionReport.innerHTML = '';
+
+      data.overdueResolution.forEach(item => {
+        const row = document.createElement('div');
+
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.padding = '12px 0';
+        row.style.borderBottom = '1px solid var(--line)';
+
+        row.innerHTML = `
+          <span>
+            ${item.reference}
+            <span style="font-size:0.78rem; color:var(--ink-soft);">
+              — ${item.status}
+            </span>
+          </span>
+
+          <span style="font-size:0.82rem; color:var(--ink-soft);">
+            Submitted ${formatDate(item.submitted_at)}
+          </span>
+        `;
+
+        overdueResolutionReport.appendChild(row);
+      });
+    }
+
+
   } catch (err) {
     console.error('Could not load reports:', err);
 
