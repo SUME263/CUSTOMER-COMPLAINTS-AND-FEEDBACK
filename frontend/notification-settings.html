@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Notification Settings | Complaints & Feedback Portal</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+  .notification-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .notification-option input[type="checkbox"] {
+    margin-top: 3px;
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  .notification-option label {
+    display: block;
+    margin: 0;
+  }
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+
+  <a href="index.html" class="brand">
+    <span class="mark">CS</span>
+
+    <span class="name">
+      Civil Service & Defence Force Finance
+      <small>Notification settings</small>
+    </span>
+  </a>
+
+  <nav class="topnav">
+    <span
+      class="current-user-name"
+      style="color:#fff; font-size:0.9rem;"
+    ></span>
+
+    <a href="#" id="sign-out">Sign out</a>
+  </nav>
+
+</header>
+
+
+<div class="app-layout">
+
+  <aside class="sidebar">
+
+    <div class="section-label">
+      Workspace
+    </div>
+
+    <a href="staff-dashboard.html">
+      Complaints queue
+    </a>
+
+    <a href="staff-dashboard.html">
+      My assigned cases
+    </a>
+
+    <a href="reports.html">
+      Reports
+    </a>
+
+
+    <div class="section-label">
+      Account
+    </div>
+
+    <a href="notification-settings.html" class="active">
+      Notification settings
+    </a>
+
+  </aside>
+
+
+  <main class="main-pane">
+
+    <div>
+
+      <div class="eyebrow">
+        Account
+      </div>
+
+      <h2>
+        Notification settings
+      </h2>
+
+      <p
+        style="
+          font-size:0.86rem;
+          margin-top:8px;
+          color:var(--ink-soft);
+        "
+      >
+        Choose which complaint-related notifications you would like to receive.
+      </p>
+
+    </div>
+
+
+    <div class="panel mt-32">
+
+      <div class="panel-header">
+
+        <div>
+
+          <div class="panel-title">
+            Complaint notifications
+          </div>
+
+          <div class="panel-subtitle">
+            Manage notifications relating to complaints assigned to you and cases you are handling.
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- New complaints -->
+
+      <div
+        class="field notification-option"
+        style="margin-top:20px;"
+      >
+
+        <input
+          type="checkbox"
+          id="notify-new-complaints"
+        >
+
+        <div>
+
+          <label for="notify-new-complaints">
+            New complaints
+          </label>
+
+          <div class="field-help">
+            Receive a notification when a new complaint is submitted.
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Complaint assignments -->
+
+      <div
+        class="field notification-option"
+        style="margin-top:20px;"
+      >
+
+        <input
+          type="checkbox"
+          id="notify-assigned"
+        >
+
+        <div>
+
+          <label for="notify-assigned">
+            Complaint assignments
+          </label>
+
+          <div class="field-help">
+            Receive a notification when a complaint is assigned to you.
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Status updates -->
+
+      <div
+        class="field notification-option"
+        style="margin-top:20px;"
+      >
+
+        <input
+          type="checkbox"
+          id="notify-status"
+        >
+
+        <div>
+
+          <label for="notify-status">
+            Status updates
+          </label>
+
+          <div class="field-help">
+            Receive a notification when the status of a complaint assigned to you changes.
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Deadline reminders -->
+
+      <div
+        class="field notification-option"
+        style="margin-top:20px;"
+      >
+
+        <input
+          type="checkbox"
+          id="notify-deadlines"
+        >
+
+        <div>
+
+          <label for="notify-deadlines">
+            Deadline reminders
+          </label>
+
+          <div class="field-help">
+            Receive notifications when complaints are approaching or have passed their configured acknowledgement or resolution deadlines.
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="notification-settings-error"
+        class="form-error"
+      ></div>
+
+
+      <div style="margin-top:24px;">
+
+        <button
+          type="button"
+          id="save-notification-settings"
+          class="btn btn-primary"
+        >
+          Save settings
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
