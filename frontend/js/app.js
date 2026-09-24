@@ -527,74 +527,74 @@ function initAdminDashboard() {
   }
 
   loadComplianceSummary();
-  loadStaffTable();
+  // loadStaffTable();
   // load compliance handles the threshold displau itself
   // loadThresholdDisplay();
 
-const editThresholdsBtn = document.getElementById('edit-thresholds-btn');
-const thresholdsContainer = document.getElementById('thresholds-form');
-const thresholdsForm = document.getElementById('thresholds-form-element');
-  const cancelThresholdsBtn = document.getElementById('cancel-thresholds-btn');
-  const thresholdsError = document.getElementById('thresholds-error');
+// const editThresholdsBtn = document.getElementById('edit-thresholds-btn');
+// const thresholdsContainer = document.getElementById('thresholds-form');
+// const thresholdsForm = document.getElementById('thresholds-form-element');
+//   const cancelThresholdsBtn = document.getElementById('cancel-thresholds-btn');
+//   const thresholdsError = document.getElementById('thresholds-error');
 
-  if (editThresholdsBtn && thresholdsForm) {
-    editThresholdsBtn.addEventListener('click', async () => {
-      thresholdsError.innerHTML = '';
+  // if (editThresholdsBtn && thresholdsForm) {
+  //   editThresholdsBtn.addEventListener('click', async () => {
+  //     thresholdsError.innerHTML = '';
 
-      try {
-        const settings = await api.getSettings();
+  //     try {
+  //       const settings = await api.getSettings();
 
-        document.getElementById('acknowledge-days').value =
-          settings.acknowledgeDays;
+  //       document.getElementById('acknowledge-days').value =
+  //         settings.acknowledgeDays;
 
-        document.getElementById('resolve-days').value =
-          settings.resolveDays;
+  //       document.getElementById('resolve-days').value =
+  //         settings.resolveDays;
 
-        thresholdsContainer.classList.remove('hidden');
+  //       thresholdsContainer.classList.remove('hidden');
 
-      } catch (err) {
-        thresholdsError.textContent = err.message;
-      }
-    });
-  }
+  //     } catch (err) {
+  //       thresholdsError.textContent = err.message;
+  //     }
+  //   });
+  // }
 
-  if (cancelThresholdsBtn) {
-    cancelThresholdsBtn.addEventListener('click', () => {
-      thresholdsContainer.classList.add('hidden');
-      thresholdsError.innerHTML = '';
-    });
-  }
+  // if (cancelThresholdsBtn) {
+  //   cancelThresholdsBtn.addEventListener('click', () => {
+  //     thresholdsContainer.classList.add('hidden');
+  //     thresholdsError.innerHTML = '';
+  //   });
+  // }
 
-  if (thresholdsForm) {
-    thresholdsForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
+  // if (thresholdsForm) {
+  //   thresholdsForm.addEventListener('submit', async (e) => {
+  //     e.preventDefault();
 
-      thresholdsError.innerHTML = '';
+  //     thresholdsError.innerHTML = '';
 
-      const acknowledgeDays = Number(
-        document.getElementById('acknowledge-days').value
-      );
+  //     const acknowledgeDays = Number(
+  //       document.getElementById('acknowledge-days').value
+  //     );
 
-      const resolveDays = Number(
-        document.getElementById('resolve-days').value
-      );
+  //     const resolveDays = Number(
+  //       document.getElementById('resolve-days').value
+  //     );
 
-      try {
-        await api.updateSettings({
-          acknowledgeDays,
-          resolveDays
-        });
+  //     try {
+  //       await api.updateSettings({
+  //         acknowledgeDays,
+  //         resolveDays
+  //       });
 
-        thresholdsContainer.classList.add('hidden');
+  //       thresholdsContainer.classList.add('hidden');
 
-        await loadComplianceSummary();
-        await loadThresholdDisplay();
+  //       await loadComplianceSummary();
+  //       // await loadThresholdDisplay();
 
-      } catch (err) {
-        thresholdsError.textContent = err.message;
-      }
-    });
-  }
+  //     } catch (err) {
+  //       thresholdsError.textContent = err.message;
+  //     }
+  //   });
+  // }
 }
 
 async function loadComplianceSummary() {
@@ -628,32 +628,32 @@ document.getElementById('resolve-days-display').textContent =
   data.thresholds.resolveDays;
 }
 
-async function loadStaffTable() {
-  const tbody = document.getElementById('staff-tbody');
-  if (!tbody) return;
-  const { users } = await api.listUsers();
-  tbody.innerHTML = '';
-  users.forEach(u => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${u.name}</td>
-      <td style="text-transform:capitalize">${u.role}</td>
-      <td>${u.branch || '—'}</td>
-      <td><span class="badge ${u.status === 'active' ? 'badge-resolved' : 'badge-closed'}">${u.status === 'active' ? 'Active' : 'Suspended'}</span></td>
-      <td><a href="#" data-id="${u.id}" data-status="${u.status}" class="toggle-status" style="font-size:0.82rem;">${u.status === 'active' ? 'Suspend' : 'Reactivate'}</a></td>`;
-    tbody.appendChild(tr);
-  });
+// async function loadStaffTable() {
+//   const tbody = document.getElementById('staff-tbody');
+//   if (!tbody) return;
+//   const { users } = await api.listUsers();
+//   tbody.innerHTML = '';
+//   users.forEach(u => {
+//     const tr = document.createElement('tr');
+//     tr.innerHTML = `
+//       <td>${u.name}</td>
+//       <td style="text-transform:capitalize">${u.role}</td>
+//       <td>${u.branch || '—'}</td>
+//       <td><span class="badge ${u.status === 'active' ? 'badge-resolved' : 'badge-closed'}">${u.status === 'active' ? 'Active' : 'Suspended'}</span></td>
+//       <td><a href="#" data-id="${u.id}" data-status="${u.status}" class="toggle-status" style="font-size:0.82rem;">${u.status === 'active' ? 'Suspend' : 'Reactivate'}</a></td>`;
+//     tbody.appendChild(tr);
+//   });
 
-  tbody.querySelectorAll('.toggle-status').forEach(link => {
-    link.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const id = e.target.dataset.id;
-      const newStatus = e.target.dataset.status === 'active' ? 'suspended' : 'active';
-      await api.updateUser(id, { status: newStatus });
-      loadStaffTable();
-    });
-  });
-}
+//   tbody.querySelectorAll('.toggle-status').forEach(link => {
+//     link.addEventListener('click', async (e) => {
+//       e.preventDefault();
+//       const id = e.target.dataset.id;
+//       const newStatus = e.target.dataset.status === 'active' ? 'suspended' : 'active';
+//       await api.updateUser(id, { status: newStatus });
+//       loadStaffTable();
+//     });
+//   });
+// }
 
 // admin user accounts
 function initAdminUsers() {
@@ -999,6 +999,111 @@ async function initNotificationSettings() {
   });
 }
 
+// Admin system settings
+function initAdminSettings() {
+  const form = document.getElementById('settings-form');
+
+  if (!form) return;
+
+  const user = requireSession('admin');
+
+  if (!user) return;
+
+  document.querySelectorAll('.current-user-name').forEach(node => {
+    node.textContent = `${user.name} — Administrator`;
+  });
+
+  const acknowledgeInput =
+    document.getElementById('acknowledge-days');
+
+  const resolveInput =
+    document.getElementById('resolve-days');
+
+  const errorBox =
+    document.getElementById('settings-error');
+
+  const saveButton =
+    document.getElementById('save-settings-btn');
+
+  const signOut =
+    document.getElementById('sign-out');
+
+  if (signOut) {
+    signOut.addEventListener('click', e => {
+      e.preventDefault();
+      clearSession();
+      window.location.href = 'index.html';
+    });
+  }
+
+  async function loadSettings() {
+    try {
+      const settings = await api.getSettings();
+
+      acknowledgeInput.value =
+        settings.acknowledgeDays;
+
+      resolveInput.value =
+        settings.resolveDays;
+
+    } catch (err) {
+      errorBox.textContent = err.message;
+    }
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    errorBox.textContent = '';
+
+    const acknowledgeDays =
+      Number(acknowledgeInput.value);
+
+    const resolveDays =
+      Number(resolveInput.value);
+
+    if (
+      !Number.isInteger(acknowledgeDays) ||
+      acknowledgeDays < 1 ||
+      !Number.isInteger(resolveDays) ||
+      resolveDays < 1
+    ) {
+      errorBox.textContent =
+        'Please enter valid working-day values.';
+      return;
+    }
+
+    saveButton.disabled = true;
+    saveButton.textContent = 'Saving...';
+
+    try {
+
+      await api.updateSettings({
+        acknowledgeDays,
+        resolveDays
+      });
+
+      saveButton.textContent = 'Saved';
+
+      setTimeout(() => {
+        saveButton.textContent = 'Save settings';
+      }, 1500);
+
+    } catch (err) {
+
+      errorBox.textContent = err.message;
+      saveButton.textContent = 'Save settings';
+
+    } finally {
+
+      saveButton.disabled = false;
+
+    }
+  });
+
+  loadSettings();
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   initRaiseComplaintForm();
   initTrackComplaint();
@@ -1006,6 +1111,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initStaffDashboard();
   initAdminDashboard();
   initAdminUsers();
+  initAdminSettings();
   initReportsPage();
   initNotificationSettings();
   initNotifications();

@@ -24,7 +24,7 @@
     <div class="section-label">System</div>
     <a href="admin-dashboard.html" class="active">Compliance overview</a>
     <a href="admin-users.html">User accounts</a>
-    <a href="#">System settings</a>
+    <a href="admin-settings.html">System settings</a>
     <div class="section-label">Reports</div>
     <a href="#">Export compliance report</a>
   </aside>
@@ -47,19 +47,6 @@
 
     <hr class="section-divider">
 
-    <div class="flex-between">
-      <h3>Staff accounts</h3>
-      <button class="btn btn-secondary">Add staff account</button>
-    </div>
-    <table class="data-table mt-32">
-      <thead>
-        <tr><th>Name</th><th>Role</th><th>Branch</th><th>Status</th><th></th></tr>
-      </thead>
-      <tbody id="staff-tbody"></tbody>
-    </table>
-
-    <hr class="section-divider">
-
     <div class="panel">
       <h3>Regulatory acknowledgement window</h3>
       <p style="margin-top:10px; font-size:0.9rem;">
@@ -68,11 +55,11 @@
           working days and resolved within
           <strong id="resolve-days-display">—</strong>
           working days, per the Bank of Zambia directive.</p>
-      <button id="edit-thresholds-btn" class="btn btn-secondary mt-32">
+      <!-- <button id="edit-thresholds-btn" class="btn btn-secondary mt-32">
         Edit thresholds
-      </button>
+      </button> -->
 
-      <div id="thresholds-form" class="panel hidden" style="margin-top:20px;">
+      <!-- <div id="thresholds-form" class="panel hidden" style="margin-top:20px;">
       <div class="panel-header">
         <div>
           <div class="panel-title">Edit resolution thresholds</div>
@@ -128,7 +115,7 @@
             Cancel
           </button>
         </div>
-      </form>
+      </form> -->
     </div>
 
     </div>
