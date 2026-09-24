@@ -1,5 +1,9 @@
 const db = require('../config/db');
 
+const {
+  addWorkingDays,
+} = require('../utils/workingDays');
+
 /** GET /api/reports/summary — staff/admin. Feeds the admin compliance dashboard. */
 function summary(req, res) {
   const total = db.prepare('SELECT COUNT(*) AS n FROM complaints').get().n;
@@ -30,23 +34,23 @@ function summary(req, res) {
   const resolveDays = getSetting('resolve_days', 14);
 
   // Complaints still open past the acknowledgement window.
-  function addWorkingDays(date, workingDays) {
-    const result = new Date(date);
-    let daysAdded = 0;
+  // function addWorkingDays(date, workingDays) {
+  //   const result = new Date(date);
+  //   let daysAdded = 0;
 
-    while (daysAdded < workingDays) {
-      result.setDate(result.getDate() + 1);
+  //   while (daysAdded < workingDays) {
+  //     result.setDate(result.getDate() + 1);
 
-      const day = result.getDay();
+  //     const day = result.getDay();
 
-      // Monday = 1, Friday = 5
-      if (day !== 0 && day !== 6) {
-        daysAdded++;
-      }
-    }
+  //     // Monday = 1, Friday = 5
+  //     if (day !== 0 && day !== 6) {
+  //       daysAdded++;
+  //     }
+  //   }
 
-    return result;
-  }
+  //   return result;
+  // }
 
   const openComplaints = db
     .prepare(

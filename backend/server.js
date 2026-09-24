@@ -2,6 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
+const {
+  checkDeadlineNotifications,
+} = require('./src/utils/deadlineNotifications');
+
 const authRoutes = require('./src/routes/authRoutes');
 const complaintsRoutes = require('./src/routes/complaintsRoutes');
 const usersRoutes = require('./src/routes/usersRoutes');
@@ -34,7 +38,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong on our side.' });
 });
 
+// check deadlines every 60 seconds  when backend starts
 const PORT = process.env.PORT || 4000;
+
 app.listen(PORT, () => {
   console.log(`CCF API listening on http://localhost:${PORT}`);
+
+  checkDeadlineNotifications();
+  setInterval(checkDeadlineNotifications, 60000);
 });
