@@ -25,24 +25,8 @@
 
 <div class="app-layout">
 
-  <aside class="sidebar">
-    <div class="section-label">Workspace</div>
-
-    <a href="staff-dashboard.html">
-      Complaints queue
-    </a>
-
-    <a href="staff-dashboard.html">
-      My assigned cases
-    </a>
-
-    <a href="reports.html" class="active">
-      Reports
-    </a>
-
-    <div class="section-label">Account</div>
-
-    <a href="notification-settings.html">Notification settings</a>
+  <aside class="sidebar" id="reports-sidebar">
+    <!-- Sidebar will be set according to the logged-in user's role -->
   </aside>
 
   <main class="main-pane">
@@ -55,6 +39,14 @@
           Overview of complaints, resolution performance and complaint categories.
         </p>
       </div>
+
+      <button
+        type="button"
+        id="export-report-btn"
+        class="btn btn-primary"
+      >
+        Export compliance report
+      </button>
     </div>
 
     <div class="stat-row mt-32">

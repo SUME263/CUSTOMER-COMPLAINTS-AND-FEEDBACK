@@ -796,16 +796,227 @@ function initAdminUsers() {
   renderUsers();
 }
 
+function exportComplianceReport(data) {
+  const rows = [];
+
+  const escapeCsv = (value) => {
+    const text = String(value ?? '');
+    return `"${text.replace(/"/g, '""')}"`;
+  };
+
+  rows.push([
+    'Compliance Report',
+    '',
+    '',
+    ''
+  ]);
+
+  rows.push([
+    'Report date',
+    new Date().toLocaleDateString(),
+    '',
+    ''
+  ]);
+
+  rows.push([
+    'Total complaints',
+    data.total,
+    '',
+    ''
+  ]);
+
+  rows.push([
+    'Open complaints',
+    data.open,
+    '',
+    ''
+  ]);
+
+  rows.push([
+    'Resolved / closed',
+    data.resolvedOrClosed,
+    '',
+    ''
+  ]);
+
+  rows.push([
+    'Resolution rate',
+    `${data.resolutionRate}%`,
+    '',
+    ''
+  ]);
+
+  rows.push([
+    'Acknowledgement window',
+    `${data.thresholds.acknowledgeDays} working days`,
+    '',
+    ''
+  ]);
+
+  rows.push([
+    'Resolution window',
+    `${data.thresholds.resolveDays} working days`,
+    '',
+    ''
+  ]);
+
+  rows.push([]);
+
+  rows.push([
+    'Complaints by category',
+    'Count',
+    '',
+    ''
+  ]);
+
+  data.byCategory.forEach(item => {
+    rows.push([
+      item.category,
+      item.count,
+      '',
+      ''
+    ]);
+  });
+
+  rows.push([]);
+
+  rows.push([
+    'Overdue acknowledgement',
+    '',
+    '',
+    ''
+  ]);
+
+  rows.push([
+    'Reference',
+    'Submitted',
+    '',
+    ''
+  ]);
+
+  data.overdueAcknowledgement.forEach(item => {
+    rows.push([
+      item.reference,
+      formatDate(item.submitted_at),
+      '',
+      ''
+    ]);
+  });
+
+  rows.push([]);
+
+  rows.push([
+    'Overdue resolution',
+    '',
+    '',
+    ''
+  ]);
+
+  rows.push([
+    'Reference',
+    'Status',
+    'Submitted',
+    ''
+  ]);
+
+  data.overdueResolution.forEach(item => {
+    rows.push([
+      item.reference,
+      item.status,
+      formatDate(item.submitted_at),
+      ''
+    ]);
+  });
+
+  const csv = rows
+    .map(row => row.map(escapeCsv).join(','))
+    .join('\n');
+
+  const blob = new Blob([csv], {
+    type: 'text/csv;charset=utf-8;'
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download =
+    `compliance-report-${new Date().toISOString().slice(0, 10)}.csv`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+}
+
 async function initReportsPage() {
   const totalEl = document.getElementById('report-total');
   if (!totalEl) return;
 
-  const user = requireSession('staff');
-  if (!user) return;
+  const user = getUser();
+  if (!user || !getToken() || !['staff', 'admin'].includes(user.role)) {
+    window.location.href = 'login.html';
+    return;
+  }
 
+  // display the current user's name and role in the header
   document.querySelectorAll('.current-user-name').forEach(el => {
-    el.textContent = `${user.name} — ${user.branch || 'Staff'}`;
+    el.textContent =
+      user.role === 'admin'
+        ? `${user.name} — Administrator`
+        : `${user.name} — ${user.branch || 'Staff'}`;
   });
+
+  const sidebar = document.getElementById('reports-sidebar');
+
+  if (sidebar) {
+    if (user.role === 'admin') {
+      sidebar.innerHTML = `
+        <div class="section-label">System</div>
+
+        <a href="admin-dashboard.html">
+          Compliance overview
+        </a>
+
+        <a href="admin-users.html">
+          User accounts
+        </a>
+
+        <a href="admin-settings.html">
+          System settings
+        </a>
+
+        <div class="section-label">Reports</div>
+        <a href="reports.html" class="active">
+          Export compliance report
+        </a>
+      `;
+    } else {
+      sidebar.innerHTML = `
+        <div class="section-label">Workspace</div>
+
+        <a href="staff-dashboard.html">
+          Complaints queue
+        </a>
+
+        <a href="staff-dashboard.html">
+          My assigned cases
+        </a>
+
+        <a href="reports.html" class="active">
+          Reports
+        </a>
+
+        <div class="section-label">Account</div>
+
+        <a href="notification-settings.html">
+          Notification settings
+        </a>
+      `;
+    }
+  }
 
   const signOut = document.getElementById('sign-out');
 
@@ -819,6 +1030,15 @@ async function initReportsPage() {
 
   try {
     const data = await api.reportSummary();
+
+    const exportButton =
+      document.getElementById('export-report-btn');
+
+    if (exportButton) {
+      exportButton.addEventListener('click', () => {
+        exportComplianceReport(data);
+      });
+    }
 
     document.getElementById('report-total').textContent = data.total;
     document.getElementById('report-open').textContent = data.open;
