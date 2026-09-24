@@ -94,7 +94,7 @@ function list(req, res) {
     sql += ' AND c.category = ?';
     params.push(category);
   }
-  
+
   if (assignedTo && assignedTo !== 'all') {
     sql += ' AND c.assigned_to = ?';
     params.push(Number(assignedTo));
@@ -153,15 +153,44 @@ function update(req, res) {
   const newStatus = status || existing.status;
   const now = new Date().toISOString();
 
+  // to know who was assigned a complaint
+  let assignmentName = null;
+
+  if (assignedTo) {
+    const assignedUser = db
+      .prepare('SELECT name FROM users WHERE id = ? AND role = ?')
+      .get(assignedTo, 'staff');
+
+    if (!assignedUser) {
+      return res.status(400).json({ error: 'Selected staff member was not found.' });
+    }
+
+    assignmentName = assignedUser.name;
+  }
+
   const run = db.transaction(() => {
     db.prepare(
-      `UPDATE complaints SET status = ?, assigned_to = COALESCE(?, assigned_to), updated_at = ? WHERE id = ?`
+      `UPDATE complaints
+      SET status = ?, assigned_to = COALESCE(?, assigned_to), updated_at = ?
+      WHERE id = ?`
     ).run(newStatus, assignedTo || null, now, existing.id);
 
+    let logNote = note.trim();
+
+    if (
+      assignedTo &&
+      Number(assignedTo) !== Number(existing.assigned_to)
+    ) {
+      logNote = `Assigned to ${assignmentName}. ${logNote}`;
+    }
+
     db.prepare(
-      `INSERT INTO complaint_logs (complaint_id, status, note, created_by, created_at) VALUES (?, ?, ?, ?, ?)`
-    ).run(existing.id, newStatus, note.trim(), req.user.id, now);
+      `INSERT INTO complaint_logs
+      (complaint_id, status, note, created_by, created_at)
+      VALUES (?, ?, ?, ?, ?)`
+    ).run(existing.id, newStatus, logNote, req.user.id, now);
   });
+
   run();
 
   const row = db
