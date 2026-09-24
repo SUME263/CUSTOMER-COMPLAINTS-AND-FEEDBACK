@@ -644,6 +644,104 @@ function initAdminUsers() {
   renderUsers();
 }
 
+async function initReportsPage() {
+  const totalEl = document.getElementById('report-total');
+  if (!totalEl) return;
+
+  const user = requireSession('staff');
+  if (!user) return;
+
+  document.querySelectorAll('.current-user-name').forEach(el => {
+    el.textContent = `${user.name} — ${user.branch || 'Staff'}`;
+  });
+
+  const signOut = document.getElementById('sign-out');
+
+  if (signOut) {
+    signOut.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearSession();
+      window.location.href = 'index.html';
+    });
+  }
+
+  try {
+    const data = await api.reportSummary();
+
+    document.getElementById('report-total').textContent = data.total;
+    document.getElementById('report-open').textContent = data.open;
+    document.getElementById('report-resolved').textContent = data.resolvedOrClosed;
+    document.getElementById('report-rate').textContent = `${data.resolutionRate}%`;
+
+    document.getElementById('report-ack-days').textContent =
+      data.thresholds.acknowledgeDays;
+
+    document.getElementById('report-resolve-days').textContent =
+      data.thresholds.resolveDays;
+
+    const categoryReport = document.getElementById('category-report');
+
+    if (!data.byCategory.length) {
+      categoryReport.innerHTML =
+        '<p style="font-size:0.86rem; color:var(--ink-soft);">No complaints recorded.</p>';
+    } else {
+      categoryReport.innerHTML = '';
+
+      data.byCategory.forEach(item => {
+        const row = document.createElement('div');
+
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.padding = '12px 0';
+        row.style.borderBottom = '1px solid var(--line)';
+
+        row.innerHTML = `
+          <span>${item.category}</span>
+          <strong>${item.count}</strong>
+        `;
+
+        categoryReport.appendChild(row);
+      });
+    }
+
+    const overdueReport = document.getElementById('overdue-report');
+
+    if (!data.overdueAcknowledgement.length) {
+      overdueReport.innerHTML =
+        '<p style="font-size:0.86rem; color:var(--ink-soft);">No overdue acknowledgement cases.</p>';
+    } else {
+      overdueReport.innerHTML = '';
+
+      data.overdueAcknowledgement.forEach(item => {
+        const row = document.createElement('div');
+
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.padding = '12px 0';
+        row.style.borderBottom = '1px solid var(--line)';
+
+        row.innerHTML = `
+          <span>${item.reference}</span>
+          <span style="font-size:0.82rem; color:var(--ink-soft);">
+            Submitted ${formatDate(item.submitted_at)}
+          </span>
+        `;
+
+        overdueReport.appendChild(row);
+      });
+    }
+
+  } catch (err) {
+    console.error('Could not load reports:', err);
+
+    document.getElementById('category-report').innerHTML =
+      `<p class="form-error">${err.message}</p>`;
+
+    document.getElementById('overdue-report').innerHTML =
+      `<p class="form-error">${err.message}</p>`;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   initRaiseComplaintForm();
   initTrackComplaint();
@@ -651,4 +749,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initStaffDashboard();
   initAdminDashboard();
   initAdminUsers();
+  initReportsPage();
 });
+
+

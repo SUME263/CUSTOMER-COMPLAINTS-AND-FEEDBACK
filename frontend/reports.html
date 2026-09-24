@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports | Complaints & Feedback Portal</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="brand">
+    <span class="mark">CS</span>
+    <span class="name">
+      Civil Service & Defence Force Finance
+      <small>Reports</small>
+    </span>
+  </a>
+
+  <nav class="topnav">
+    <span class="current-user-name" style="color:#fff; font-size:0.9rem;"></span>
+    <a href="#" id="sign-out">Sign out</a>
+  </nav>
+</header>
+
+<div class="app-layout">
+
+  <aside class="sidebar">
+    <div class="section-label">Workspace</div>
+
+    <a href="staff-dashboard.html">
+      Complaints queue
+    </a>
+
+    <a href="staff-dashboard.html">
+      My assigned cases
+    </a>
+
+    <a href="reports.html" class="active">
+      Reports
+    </a>
+
+    <div class="section-label">Account</div>
+
+    <a href="#">
+      Notification settings
+    </a>
+  </aside>
+
+  <main class="main-pane">
+
+    <div class="flex-between">
+      <div>
+        <div class="eyebrow">Reporting</div>
+        <h2>Complaint reports</h2>
+        <p style="font-size:0.86rem; margin-top:8px; color:var(--ink-soft);">
+          Overview of complaints, resolution performance and complaint categories.
+        </p>
+      </div>
+    </div>
+
+    <div class="stat-row mt-32">
+
+      <div class="stat-tile">
+        <div class="num" id="report-total">–</div>
+        <div class="lbl">Total complaints</div>
+      </div>
+
+      <div class="stat-tile">
+        <div class="num" id="report-open">–</div>
+        <div class="lbl">Open complaints</div>
+      </div>
+
+      <div class="stat-tile">
+        <div class="num" id="report-resolved">–</div>
+        <div class="lbl">Resolved / closed</div>
+      </div>
+
+      <div class="stat-tile">
+        <div class="num" id="report-rate">–</div>
+        <div class="lbl">Resolution rate</div>
+      </div>
+
+    </div>
+
+    <div class="panel mt-32">
+
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Complaints by category</div>
+          <div class="panel-subtitle">
+            Number of complaints recorded under each category.
+          </div>
+        </div>
+      </div>
+
+      <div id="category-report">
+        <p style="font-size:0.86rem; color:var(--ink-soft);">
+          Loading report...
+        </p>
+      </div>
+
+    </div>
+
+    <div class="panel mt-32">
+
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Regulatory thresholds</div>
+          <div class="panel-subtitle">
+            Current acknowledgement and resolution settings.
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:0.88rem; line-height:1.8;">
+        <p>
+          Acknowledgement window:
+          <strong id="report-ack-days">–</strong>
+          working days
+        </p>
+
+        <p>
+          Resolution window:
+          <strong id="report-resolve-days">–</strong>
+          working days
+        </p>
+      </div>
+
+    </div>
+
+    <div class="panel mt-32">
+
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Overdue acknowledgement</div>
+          <div class="panel-subtitle">
+            Open complaints currently beyond the configured acknowledgement threshold.
+          </div>
+        </div>
+      </div>
+
+      <div id="overdue-report">
+        <p style="font-size:0.86rem; color:var(--ink-soft);">
+          Loading report...
+        </p>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
