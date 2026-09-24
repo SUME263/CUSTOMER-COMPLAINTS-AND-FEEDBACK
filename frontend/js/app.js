@@ -777,6 +777,76 @@ async function initReportsPage() {
   }
 }
 
+async function initNotificationSettings() {
+  const page = document.getElementById('save-notification-settings');
+
+  if (!page) return;
+
+  const user = requireSession('staff');
+
+  if (!user) return;
+
+  const newComplaints = document.getElementById('notify-new-complaints');
+  const complaintAssignments = document.getElementById('notify-assigned');
+  const statusUpdates = document.getElementById('notify-status');
+  const deadlineReminders = document.getElementById('notify-deadlines');
+
+  const errorBox = document.getElementById('notification-settings-error');
+  const saveButton = document.getElementById('save-notification-settings');
+
+  const showError = (message) => {
+    errorBox.textContent = message;
+    errorBox.style.display = 'block';
+  };
+
+  const clearError = () => {
+    errorBox.textContent = '';
+    errorBox.style.display = 'none';
+  };
+
+  // Load the user's current settings
+  try {
+    const settings = await api.getNotificationSettings();
+
+    newComplaints.checked = settings.newComplaints;
+    complaintAssignments.checked = settings.complaintAssignments;
+    statusUpdates.checked = settings.statusUpdates;
+    deadlineReminders.checked = settings.deadlineReminders;
+  } catch (error) {
+    showError(error.message);
+    return;
+  }
+
+  // Save settings
+  saveButton.addEventListener('click', async () => {
+    clearError();
+
+    saveButton.disabled = true;
+    saveButton.textContent = 'Saving...';
+
+    try {
+      await api.updateNotificationSettings({
+        newComplaints: newComplaints.checked,
+        complaintAssignments: complaintAssignments.checked,
+        statusUpdates: statusUpdates.checked,
+        deadlineReminders: deadlineReminders.checked,
+      });
+
+      saveButton.textContent = 'Saved';
+
+      setTimeout(() => {
+        saveButton.textContent = 'Save settings';
+      }, 1500);
+
+    } catch (error) {
+      showError(error.message);
+      saveButton.textContent = 'Save settings';
+    } finally {
+      saveButton.disabled = false;
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   initRaiseComplaintForm();
   initTrackComplaint();
@@ -785,6 +855,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initAdminDashboard();
   initAdminUsers();
   initReportsPage();
+  initNotificationSettings();
 });
 
 

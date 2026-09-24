@@ -61,6 +61,7 @@ const api = {
     const qs = new URLSearchParams(Object.entries(filters).filter(([, v]) => v && v !== 'all')).toString();
     return apiFetch(`/complaints${qs ? `?${qs}` : ''}`);
   },
+  
   getComplaint: (id) => apiFetch(`/complaints/${id}`),
   updateComplaint: (id, payload) => apiFetch(`/complaints/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
    reportSummary: () => apiFetch('/reports/summary'),
@@ -69,14 +70,24 @@ const api = {
     method: 'POST',
     body: JSON.stringify(payload)
   }),
+
   updateUser: (id, payload) => apiFetch(`/users/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(payload)
   }),
 
   getSettings: () => apiFetch('/settings'),
-  updateSettings: (payload) => apiFetch('/settings', {
-    method: 'PATCH',
-    body: JSON.stringify(payload)
+    updateSettings: (payload) => apiFetch('/settings', {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+  }),
+
+  getNotificationSettings: () =>
+   apiFetch('/notification-settings'),
+
+  updateNotificationSettings: (payload) =>
+    apiFetch('/notification-settings', {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
   }),
 };

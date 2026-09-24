@@ -32,6 +32,16 @@ db.exec(`
     created_at    TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+    CREATE TABLE IF NOT EXISTS notification_settings (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id             INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    new_complaints      INTEGER NOT NULL DEFAULT 1,
+    complaint_assignments INTEGER NOT NULL DEFAULT 1,
+    status_updates      INTEGER NOT NULL DEFAULT 1,
+    deadline_reminders  INTEGER NOT NULL DEFAULT 1,
+    updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS complaints (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     reference      TEXT NOT NULL UNIQUE,
