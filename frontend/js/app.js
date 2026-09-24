@@ -145,7 +145,7 @@ async function renderTrackResult(ref) {
   });
 }
 
-/* -------- Login page -------- */
+// Login page
 function initLoginPage() {
   const form = document.getElementById('login-form');
   if (!form) return;
@@ -164,14 +164,33 @@ function initLoginPage() {
   });
 }
 
-/* -------- Staff dashboard -------- */
-function initStaffDashboard() {
+// Staff dashboard
+async function initStaffDashboard() {
   const tbody = document.getElementById('complaints-tbody');
   if (!tbody) return;
 
   const user = requireSession('staff');
   if (!user) return;
-  document.querySelectorAll('.current-user-name').forEach(el => { el.textContent = `${user.name} — ${user.branch || 'Staff'}`; });
+  document.querySelectorAll('.current-user-name').forEach(el => { 
+    el.textContent = `${user.name} — ${user.branch || 'Staff'}`; 
+  });
+
+  const assignedSelect = document.getElementById('d-assigned');
+
+if (assignedSelect) {
+  try {
+    const { users } = await apiFetch('/complaints/assignees');
+
+    users.forEach(staff => {
+      const option = document.createElement('option');
+      option.value = staff.id;
+      option.textContent = `${staff.name}${staff.branch ? ` — ${staff.branch}` : ''}`;
+      assignedSelect.appendChild(option);
+    });
+  } catch (err) {
+    console.error('Could not load staff accounts:', err);
+  }
+}
 
   const catFilter = document.getElementById('filter-category');
   CATEGORIES.forEach(c => {
@@ -231,7 +250,8 @@ async function openDetail(id) {
   document.getElementById('d-submitted').textContent = formatDate(c.submitted);
   document.getElementById('d-badge').textContent = c.status;
   document.getElementById('d-badge').className = 'badge ' + statusBadgeClass(c.status);
-  document.getElementById('d-assigned').value = c.assigned === 'Unassigned' ? '' : c.assigned;
+  document.getElementById('d-assigned').value =
+  c.assignedId || '';
 
   document.getElementById('d-status-select').value = c.status;
 
@@ -256,6 +276,7 @@ async function openDetail(id) {
       await api.updateComplaint(id, {
         status: document.getElementById('d-status-select').value,
         note,
+        assignedTo: document.getElementById('d-assigned').value || null,
       });
       document.getElementById('d-note').value = '';
       await openDetail(id);
@@ -295,7 +316,7 @@ function initAdminDashboard() {
   // load compliance handles the threshold displau itself
   // loadThresholdDisplay();
 
-  const editThresholdsBtn = document.getElementById('edit-thresholds-btn');
+const editThresholdsBtn = document.getElementById('edit-thresholds-btn');
 const thresholdsContainer = document.getElementById('thresholds-form');
 const thresholdsForm = document.getElementById('thresholds-form-element');
   const cancelThresholdsBtn = document.getElementById('cancel-thresholds-btn');

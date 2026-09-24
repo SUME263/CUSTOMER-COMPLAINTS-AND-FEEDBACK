@@ -114,6 +114,21 @@ function getById(req, res) {
   res.json({ complaint });
 }
 
+/** GET /api/complaints/assignees — staff/admin. List active staff accounts. */
+function listAssignees(req, res) {
+  const rows = db
+    .prepare(`
+      SELECT id, name, email, branch
+      FROM users
+      WHERE role = 'staff'
+        AND status = 'active'
+      ORDER BY name ASC
+    `)
+    .all();
+
+  res.json({ users: rows });
+}
+
 /** PATCH /api/complaints/:id — staff/admin. Update status/assignment, append a log entry. */
 function update(req, res) {
   const { status, note, assignedTo } = req.body;
@@ -151,4 +166,4 @@ function update(req, res) {
   res.json({ complaint });
 }
 
-module.exports = { create, trackByReference, list, getById, update };
+module.exports = { create, trackByReference, list, getById, update, listAssignees };
