@@ -333,6 +333,97 @@ function initLoginPage() {
   });
 }
 
+// My Assigned Cases page
+async function initMyAssignedCases() {
+  const tbody = document.getElementById('assigned-cases-tbody');
+  if (!tbody) return;
+
+  const user = requireSession('staff');
+  if (!user) return;
+
+  document.querySelectorAll('.current-user-name').forEach(el => {
+    el.textContent = `${user.name} — ${user.branch || 'Staff'}`;
+  });
+
+  const assignedSelect = document.getElementById('d-assigned');
+
+  if (assignedSelect) {
+    try {
+      const { users } = await apiFetch('/complaints/assignees');
+
+      users.forEach(staff => {
+        const option = document.createElement('option');
+        option.value = staff.id;
+        option.textContent = `${staff.name}${staff.branch ? ` — ${staff.branch}` : ''}`;
+        assignedSelect.appendChild(option);
+      });
+    } catch (err) {
+      console.error('Could not load staff accounts:', err);
+    }
+  }
+
+  async function renderAssignedCases() {
+    const status = document.getElementById('assigned-filter-status').value;
+
+    const { complaints } = await api.listComplaints({
+      status,
+      category: 'all',
+      assignedTo: user.id
+    });
+
+    tbody.innerHTML = '';
+
+    document.getElementById('assigned-result-count').textContent =
+      `${complaints.length} complaint${complaints.length === 1 ? '' : 's'}`;
+
+    complaints.forEach(c => {
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td class="cell-ref">${c.ref}</td>
+        <td>${c.name}</td>
+        <td>${c.category}</td>
+        <td>${formatDate(c.submitted)}</td>
+        <td>
+          <span class="badge ${statusBadgeClass(c.status)}">${c.status}</span>
+        </td>
+      `;
+
+      tr.addEventListener('click', () => openDetail(c.id));
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('stat-open').textContent =
+      complaints.filter(c => c.status === 'Open').length;
+
+    document.getElementById('stat-progress').textContent =
+      complaints.filter(c => c.status === 'In Progress').length;
+
+    document.getElementById('stat-resolved').textContent =
+      complaints.filter(c => c.status === 'Resolved').length;
+
+    document.getElementById('stat-total').textContent =
+      complaints.length;
+  }
+
+  document
+    .getElementById('assigned-filter-status')
+    .addEventListener('change', () => renderAssignedCases());
+
+  await renderAssignedCases();
+
+  const signOut = document.getElementById('sign-out');
+
+  if (signOut) {
+    signOut.addEventListener('click', e => {
+      e.preventDefault();
+      clearSession();
+      window.location.href = 'index.html';
+    });
+  }
+}
+
+
 // Staff dashboard
 async function initStaffDashboard() {
   const tbody = document.getElementById('complaints-tbody');
@@ -403,35 +494,35 @@ if (assignedSelect) {
     document.getElementById('filter-status').addEventListener('change', () => render());
     document.getElementById('filter-category').addEventListener('change', () => render());
 
-  const myAssignedCases = document.getElementById('my-assigned-cases');
+  // const myAssignedCases = document.getElementById('my-assigned-cases');
 
-  const complaintsQueue = document.querySelector('.sidebar a.active');
+  // const complaintsQueue = document.querySelector('.sidebar a.active');
 
-  if (myAssignedCases && complaintsQueue) {
-    myAssignedCases.addEventListener('click', (e) => {
-      e.preventDefault();
+  // if (myAssignedCases && complaintsQueue) {
+  //   myAssignedCases.addEventListener('click', (e) => {
+  //     e.preventDefault();
 
-      complaintsQueue.classList.remove('active');
-      myAssignedCases.classList.add('active');
+  //     complaintsQueue.classList.remove('active');
+  //     myAssignedCases.classList.add('active');
 
-      document.getElementById('filter-status').value = 'all';
-      document.getElementById('filter-category').value = 'all';
+  //     document.getElementById('filter-status').value = 'all';
+  //     document.getElementById('filter-category').value = 'all';
 
-      render(getUser().id);
-    });
+  //     render(getUser().id);
+  //   });
 
-    complaintsQueue.addEventListener('click', (e) => {
-      e.preventDefault();
+  //   complaintsQueue.addEventListener('click', (e) => {
+  //     e.preventDefault();
 
-      myAssignedCases.classList.remove('active');
-      complaintsQueue.classList.add('active');
+  //     myAssignedCases.classList.remove('active');
+  //     complaintsQueue.classList.add('active');
 
-      document.getElementById('filter-status').value = 'all';
-      document.getElementById('filter-category').value = 'all';
+  //     document.getElementById('filter-status').value = 'all';
+  //     document.getElementById('filter-category').value = 'all';
 
-      render();
-    });
-  }
+  //     render();
+  //   });
+  // }
 
   render();
   window.__renderStaffTable = render;
@@ -1318,6 +1409,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initTrackComplaint();
   initLoginPage();
   initStaffDashboard();
+  initMyAssignedCases();
   initAdminDashboard();
   initAdminUsers();
   initAdminSettings();

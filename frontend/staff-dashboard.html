@@ -22,8 +22,8 @@
 <div class="app-layout">
   <aside class="sidebar">
   <div class="section-label">Workspace</div>
-  <a href="staff-dashboard.html">Complaints queue</a>
-  <a href="staff-dashboard.html">My assigned cases</a>
+  <a href="staff-dashboard.html" id="complaints-queue-link" class="active">Complaints queue</a>
+  <a href="my-assigned-cases.html" id="my-assigned-cases">My assigned cases</a>
 
   <a href="staff-dashboard.html#notifications" class="notification-sidebar-link">
     <span>Notifications</span>
@@ -36,8 +36,7 @@
         padding:2px 6px;
         border-radius:10px;
         background:var(--ink);
-        color:white;
-      "
+        color:white; "
     >
       0
     </span>
@@ -53,7 +52,7 @@
 </aside>
 
   <main class="main-pane">
-    <div class="panel mt-32" id="notifications-panel">
+    <div class="panel mt-16" id="notifications-panel">
       <div class="panel-header">
         <div>
           <div class="panel-title">
