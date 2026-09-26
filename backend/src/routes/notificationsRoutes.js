@@ -4,7 +4,7 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.use(requireAuth, requireRole("staff", "admin"));
+router.use(requireAuth, requireRole("staff", "assigner", "admin"));
 
 router.get("/", controller.list);
 router.get("/unread-count", controller.unreadCount);

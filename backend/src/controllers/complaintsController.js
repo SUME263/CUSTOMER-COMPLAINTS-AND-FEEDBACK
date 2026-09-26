@@ -201,7 +201,7 @@ function listAssignees(req, res) {
 
 /** PATCH /api/complaints/:id — staff/admin. Update status/assignment, append a log entry. */
 function update(req, res) {
-  const { status, note, assignedTo } = req.body;
+  const { status, note } = req.body;
   const existing = db
     .prepare("SELECT * FROM complaints WHERE id = ?")
     .get(req.params.id);
@@ -212,6 +212,7 @@ function update(req, res) {
       .status(400)
       .json({ error: "A note is required for every status update." });
   }
+
   if (status && !VALID_STATUSES.includes(status)) {
     return res.status(400).json({ error: "Invalid status value." });
   }
@@ -220,34 +221,34 @@ function update(req, res) {
   const now = new Date().toISOString();
 
   // to know who was assigned a complaint
-  let assignmentName = null;
+  // let assignmentName = null;
 
-  if (assignedTo) {
-    const assignedUser = db
-      .prepare("SELECT name FROM users WHERE id = ? AND role = ?")
-      .get(assignedTo, "staff");
+  // if (assignedTo) {
+  //   const assignedUser = db
+  //     .prepare("SELECT name FROM users WHERE id = ? AND role = ?")
+  //     .get(assignedTo, "staff");
 
-    if (!assignedUser) {
-      return res
-        .status(400)
-        .json({ error: "Selected staff member was not found." });
-    }
+  //   if (!assignedUser) {
+  //     return res
+  //       .status(400)
+  //       .json({ error: "Selected staff member was not found." });
+  //   }
 
-    assignmentName = assignedUser.name;
-  }
+  //   assignmentName = assignedUser.name;
+  // }
 
   const run = db.transaction(() => {
     db.prepare(
       `UPDATE complaints
-      SET status = ?, assigned_to = COALESCE(?, assigned_to), updated_at = ?
+      SET status = ?, updated_at = ?
       WHERE id = ?`,
-    ).run(newStatus, assignedTo || null, now, existing.id);
+    ).run(newStatus, now, existing.id);
 
     let logNote = note.trim();
 
-    if (assignedTo && Number(assignedTo) !== Number(existing.assigned_to)) {
-      logNote = `Assigned to ${assignmentName}. ${logNote}`;
-    }
+    // if (assignedTo && Number(assignedTo) !== Number(existing.assigned_to)) {
+    //   logNote = `Assigned to ${assignmentName}. ${logNote}`;
+    // }
 
     if (newStatus && newStatus !== existing.status && existing.assigned_to) {
       createNotification({
@@ -260,16 +261,16 @@ function update(req, res) {
       });
     }
 
-    if (assignedTo && Number(assignedTo) !== Number(existing.assigned_to)) {
-      createNotification({
-        userId: Number(assignedTo),
-        complaintId: existing.id,
-        type: "assignment",
-        title: "Complaint assigned to you",
-        message: `${existing.reference} has been assigned to you for review.`,
-        settingKey: "complaintAssignments",
-      });
-    }
+    // if (assignedTo && Number(assignedTo) !== Number(existing.assigned_to)) {
+    //   createNotification({
+    //     userId: Number(assignedTo),
+    //     complaintId: existing.id,
+    //     type: "assignment",
+    //     title: "Complaint assigned to you",
+    //     message: `${existing.reference} has been assigned to you for review.`,
+    //     settingKey: "complaintAssignments",
+    //   });
+    // }
 
     db.prepare(
       `INSERT INTO complaint_logs
@@ -290,6 +291,98 @@ function update(req, res) {
   res.json({ complaint });
 }
 
+// for assignee 
+function assign(req, res) {
+  const { assignedTo } = req.body;
+
+  const existing = db
+    .prepare("SELECT * FROM complaints WHERE id = ?")
+    .get(req.params.id);
+
+  if (!existing) {
+    return res.status(404).json({ error: "Complaint not found." });
+  }
+
+  if (!assignedTo) {
+    return res
+      .status(400)
+      .json({ error: "A staff member must be selected." });
+  }
+
+  const assignedUser = db
+    .prepare(
+      "SELECT id, name FROM users WHERE id = ? AND role = 'staff' AND status = 'active'",
+    )
+    .get(Number(assignedTo));
+
+  if (!assignedUser) {
+    return res
+      .status(400)
+      .json({ error: "Selected staff member was not found." });
+  }
+
+  if (Number(assignedTo) === Number(existing.assigned_to)) {
+    return res
+      .status(400)
+      .json({ error: "This complaint is already assigned to that staff member." });
+  }
+
+  const now = new Date().toISOString();
+
+  const run = db.transaction(() => {
+    db.prepare(
+      `
+      UPDATE complaints
+      SET assigned_to = ?, updated_at = ?
+      WHERE id = ?
+      `,
+    ).run(Number(assignedTo), now, existing.id);
+
+    const logNote = `Assigned to ${assignedUser.name}.`;
+
+    db.prepare(
+      `
+      INSERT INTO complaint_logs
+      (complaint_id, status, note, created_by, created_at)
+      VALUES (?, ?, ?, ?, ?)
+      `,
+    ).run(
+      existing.id,
+      existing.status,
+      logNote,
+      req.user.id,
+      now,
+    );
+
+    createNotification({
+      userId: Number(assignedTo),
+      complaintId: existing.id,
+      type: "assignment",
+      title: "Complaint assigned to you",
+      message: `${existing.reference} has been assigned to you for review.`,
+      settingKey: "complaintAssignments",
+    });
+  });
+
+  run();
+
+  const row = db
+    .prepare(
+      `
+      SELECT c.*, u.name AS assigned_name
+      FROM complaints c
+      LEFT JOIN users u ON u.id = c.assigned_to
+      WHERE c.id = ?
+      `,
+    )
+    .get(existing.id);
+
+  const complaint = serializeComplaint(row);
+  complaint.log = attachLog(existing.id);
+
+  res.json({ complaint });
+}
+
 module.exports = {
   create,
   trackByReference,
@@ -297,4 +390,5 @@ module.exports = {
   getById,
   update,
   listAssignees,
+  assign,
 };

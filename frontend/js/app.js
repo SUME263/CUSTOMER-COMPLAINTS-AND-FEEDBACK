@@ -353,8 +353,14 @@ function initLoginPage() {
     try {
       const { token, user } = await api.login(email, password);
       setSession(token, user);
-      window.location.href =
-        user.role === "admin" ? "admin-dashboard.html" : "staff-dashboard.html";
+
+      if (user.role === "admin") {
+        window.location.href = "admin-dashboard.html";
+      } else if (user.role === "assigner") {
+        window.location.href = "assigner-dashboard.html";
+      } else {
+        window.location.href = "staff-dashboard.html";
+      }
     } catch (err) {
       showFormError(form, err.message);
     }
@@ -971,18 +977,27 @@ async function initReportsPage() {
   if (!totalEl) return;
 
   const user = getUser();
-  if (!user || !getToken() || !["staff", "admin"].includes(user.role)) {
+  if (
+    !user ||
+    !getToken() ||
+    !["staff", "assigner", "admin"].includes(user.role)
+  ) {
     window.location.href = "login.html";
     return;
   }
 
   // display the current user's name and role in the header
   document.querySelectorAll(".current-user-name").forEach((el) => {
-    el.textContent =
-      user.role === "admin"
-        ? `${user.name} — Administrator`
-        : `${user.name} — ${user.branch || "Staff"}`;
-  });
+  let roleLabel = "Staff";
+
+  if (user.role === "admin") {
+    roleLabel = "Administrator";
+  } else if (user.role === "assigner") {
+    roleLabel = "Assigner / Monitor";
+  }
+
+  el.textContent = `${user.name} — ${roleLabel}`;
+});
 
   const sidebar = document.getElementById("reports-sidebar");
 
@@ -1319,12 +1334,247 @@ function initAdminSettings() {
   loadSettings();
 }
 
+// Assigner dashboard
+async function initAssignerDashboard() {
+  const tbody = document.getElementById("assigner-complaints-tbody");
+
+  if (!tbody) return;
+
+  const user = requireSession("assigner");
+
+  if (!user) return;
+
+  document.querySelectorAll(".current-user-name").forEach((el) => {
+    el.textContent = `${user.name} — Assigner / Monitor`;
+  });
+
+  const statusFilter = document.getElementById("assigner-filter-status");
+  const categoryFilter = document.getElementById("assigner-filter-category");
+  const assignmentFilter = document.getElementById("assigner-filter-assignment");
+
+  const detailCard = document.getElementById("assigner-detail-card");
+  const closeDetail = document.getElementById("close-assigner-detail");
+
+  const staffSelect = document.getElementById("assigner-staff-select");
+  const assignButton = document.getElementById("assigner-assign-btn");
+  const assignmentMessage = document.getElementById(
+    "assigner-assignment-message",
+  );
+
+  let currentComplaintId = null;
+
+  async function loadStaff() {
+    try {
+      const { users } = await apiFetch("/complaints/assignees");
+
+      staffSelect.innerHTML =
+        '<option value="">Select staff member</option>';
+
+      users.forEach((staff) => {
+        const option = document.createElement("option");
+
+        option.value = staff.id;
+        option.textContent = `${staff.name}${
+          staff.branch ? ` — ${staff.branch}` : ""
+        }`;
+
+        staffSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Could not load staff accounts:", error);
+    }
+  }
+
+  async function renderComplaints() {
+    try {
+      const status = statusFilter.value;
+      const category = categoryFilter.value;
+
+      const { complaints } = await api.listComplaints({
+        status,
+        category,
+      });
+
+      let filteredComplaints = complaints;
+
+      if (assignmentFilter.value === "unassigned") {
+        filteredComplaints = complaints.filter(
+          (complaint) => !complaint.assignedId,
+        );
+      }
+
+      if (assignmentFilter.value === "assigned") {
+        filteredComplaints = complaints.filter(
+          (complaint) => complaint.assignedId,
+        );
+      }
+
+      tbody.innerHTML = "";
+
+      document.getElementById("result-count").textContent =
+        `${filteredComplaints.length} complaint${
+          filteredComplaints.length === 1 ? "" : "s"
+        }`;
+
+      filteredComplaints.forEach((complaint) => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td class="cell-ref">${complaint.ref}</td>
+          <td>${complaint.name}</td>
+          <td>${complaint.category}</td>
+          <td>
+            <span class="badge ${statusBadgeClass(complaint.status)}">
+              ${complaint.status}
+            </span>
+          </td>
+          <td>${complaint.assigned || "Unassigned"}</td>
+          <td>${formatDate(complaint.submitted)}</td>
+        `;
+
+        tr.addEventListener("click", () => openComplaint(complaint.id));
+
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("stat-open").textContent =
+        complaints.filter((c) => c.status === "Open").length;
+
+      document.getElementById("stat-progress").textContent =
+        complaints.filter((c) => c.status === "In Progress").length;
+
+      document.getElementById("stat-resolved").textContent =
+        complaints.filter((c) => c.status === "Resolved").length;
+
+      document.getElementById("stat-unassigned").textContent =
+        complaints.filter((c) => !c.assignedId).length;
+
+      document.getElementById("stat-total").textContent =
+        complaints.length;
+    } catch (error) {
+      console.error("Could not load complaints:", error);
+    }
+  }
+
+  async function openComplaint(id) {
+    try {
+      const { complaint } = await apiFetch(`/complaints/${id}`);
+
+      currentComplaintId = complaint.id;
+
+      document.getElementById("assigner-detail-ref").textContent =
+        complaint.ref;
+
+      document.getElementById("assigner-detail-name").textContent =
+        complaint.name;
+
+      document.getElementById("assigner-detail-nrc").textContent =
+        complaint.nrc;
+
+      document.getElementById("assigner-detail-phone").textContent =
+        complaint.phone || "Not provided";
+
+      document.getElementById("assigner-detail-email").textContent =
+        complaint.email || "Not provided";
+
+      document.getElementById("assigner-detail-category").textContent =
+        complaint.category;
+
+      document.getElementById("assigner-detail-status").textContent =
+        complaint.status;
+
+      document.getElementById("assigner-detail-assigned").textContent =
+        complaint.assigned || "Unassigned";
+
+      document.getElementById("assigner-detail-submitted").textContent =
+        formatDate(complaint.submitted);
+
+      document.getElementById("assigner-detail-description").textContent =
+        complaint.description;
+
+      staffSelect.value = complaint.assignedId || "";
+
+      assignmentMessage.textContent = "";
+
+      detailCard.classList.remove("hidden");
+      document.getElementById("assigner-detail-empty").classList.add("hidden");
+
+      detailCard.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } catch (error) {
+      console.error("Could not load complaint details:", error);
+    }
+  }
+
+  statusFilter.addEventListener("change", renderComplaints);
+  categoryFilter.addEventListener("change", renderComplaints);
+  assignmentFilter.addEventListener("change", renderComplaints);
+
+  closeDetail.addEventListener("click", () => {
+    detailCard.classList.add("hidden");
+    document.getElementById("assigner-detail-empty").classList.remove("hidden");
+    currentComplaintId = null;
+  });
+
+  assignButton.addEventListener("click", async () => {
+    if (!currentComplaintId) return;
+
+    const assignedTo = staffSelect.value;
+
+    if (!assignedTo) {
+      assignmentMessage.textContent =
+        "Please select a staff member.";
+      return;
+    }
+
+    assignButton.disabled = true;
+    assignmentMessage.textContent = "Saving assignment...";
+
+    try {
+      await apiFetch(`/complaints/${currentComplaintId}/assignment`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          assignedTo: Number(assignedTo),
+        }),
+      });
+
+      assignmentMessage.textContent =
+        "Complaint assigned successfully.";
+
+      await renderComplaints();
+      await openComplaint(currentComplaintId);
+    } catch (error) {
+      assignmentMessage.textContent =
+        error.message || "Could not assign complaint.";
+    } finally {
+      assignButton.disabled = false;
+    }
+  });
+
+  const signOut = document.getElementById("sign-out");
+
+  if (signOut) {
+    signOut.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      clearSession();
+      window.location.href = "index.html";
+    });
+  }
+
+  await loadStaff();
+  await renderComplaints();
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   initRaiseComplaintForm();
   initTrackComplaint();
   initLoginPage();
   initStaffDashboard();
   initMyAssignedCases();
+  initAssignerDashboard();
   initAdminDashboard();
   initAdminUsers();
   initAdminSettings();

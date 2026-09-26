@@ -29,6 +29,7 @@ const tembo = upsertUser({
   role: "staff",
   branch: "Lusaka HQ",
 });
+
 const zulu = upsertUser({
   name: "C. Zulu",
   email: "c.zulu@ccf.local",
@@ -36,11 +37,20 @@ const zulu = upsertUser({
   role: "staff",
   branch: "Ndola",
 });
+
 upsertUser({
   name: "S. Mwape",
   email: "s.mwape@ccf.local",
   password: "Admin123!",
   role: "admin",
+  branch: "Lusaka HQ",
+});
+
+upsertUser({
+  name: "A. Phiri",
+  email: "a.phiri@ccf.local",
+  password: "Assigner123!",
+  role: "assigner",
   branch: "Lusaka HQ",
 });
 

@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assigner / Monitor | Complaints & Feedback Portal</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <header class="topbar">
+      <a href="index.html" class="brand">
+        <span class="mark">CS</span>
+        <span class="name">
+          Civil Service & Defence Force Finance
+          <small>Assigner / Monitor workspace</small>
+        </span>
+      </a>
+
+      <nav class="topnav">
+        <span
+          class="current-user-name"
+          style="color: #fff; font-size: 0.9rem"
+        ></span>
+
+        <a href="#" id="sign-out">Sign out</a>
+      </nav>
+    </header>
+
+    <div class="app-layout">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="section-label">Workspace</div>
+
+        <a href="assigner-dashboard.html" class="active">
+          Complaint queue
+        </a>
+
+        <a href="reports.html">
+          Reports
+        </a>
+
+        <a
+          href="notifications.html"
+          class="notification-sidebar-link"
+        >
+          <span>Notifications</span>
+
+          <span
+            id="sidebar-notification-count"
+            style="
+              font-size: 0.72rem;
+              min-width: 20px;
+              text-align: center;
+              padding: 2px 6px;
+              border-radius: 10px;
+              background: var(--ink);
+              color: white;
+            "
+          >
+            0
+          </span>
+        </a>
+
+        <div class="section-label">Account</div>
+
+        <a href="notification-settings.html">
+          Notification settings
+        </a>
+      </aside>
+
+      <!-- Main queue -->
+      <main class="main-pane">
+
+        <div class="flex-between mt-16">
+          <div>
+            <div class="eyebrow">Complaint monitoring</div>
+            <h2>All complaints</h2>
+          </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stat-row mt-32">
+
+          <div class="stat-tile">
+            <div class="num" id="stat-open">–</div>
+            <div class="lbl">Open</div>
+          </div>
+
+          <div class="stat-tile">
+            <div class="num" id="stat-progress">–</div>
+            <div class="lbl">In progress</div>
+          </div>
+
+          <div class="stat-tile">
+            <div class="num" id="stat-resolved">–</div>
+            <div class="lbl">Resolved</div>
+          </div>
+
+          <div class="stat-tile">
+            <div class="num" id="stat-unassigned">–</div>
+            <div class="lbl">Unassigned</div>
+          </div>
+
+          <div class="stat-tile">
+            <div class="num" id="stat-total">–</div>
+            <div class="lbl">Total logged</div>
+          </div>
+
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar flex-between">
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap">
+
+            <select id="assigner-filter-status">
+              <option value="all">All statuses</option>
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
+            </select>
+
+            <select id="assigner-filter-category">
+              <option value="all">All categories</option>
+            </select>
+
+            <select id="assigner-filter-assignment">
+              <option value="all">All assignments</option>
+              <option value="unassigned">Unassigned</option>
+              <option value="assigned">Assigned</option>
+            </select>
+
+          </div>
+
+          <span
+            id="result-count"
+            style="font-size: 0.82rem; color: var(--ink-soft)"
+          ></span>
+
+        </div>
+
+        <!-- Complaints table -->
+        <table class="data-table">
+
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Customer</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Assigned to</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+
+          <tbody id="assigner-complaints-tbody"></tbody>
+
+        </table>
+
+        <div class="hint mt-32">
+          Click a complaint to review its details and assign or reassign it
+          to a staff member.
+        </div>
+
+      </main>
+
+      <!-- Detail panel -->
+      <aside
+        style="
+          width: 380px;
+          border-left: 1px solid var(--line);
+          padding: 32px;
+          flex-shrink: 0;
+          background: var(--paper-raise);
+        "
+      >
+
+        <div id="assigner-detail-empty">
+          <div class="eyebrow">Detail</div>
+
+          <h3>Select a complaint</h3>
+
+          <p style="font-size: 0.86rem; margin-top: 10px">
+            Click any complaint in the queue to review its details and
+            assign it to a staff member.
+          </p>
+        </div>
+
+        <div id="assigner-detail-card" class="hidden">
+
+          <div class="flex-between">
+
+            <div
+              class="eyebrow"
+              id="assigner-detail-ref"
+            >
+              CCF-2026-0000
+            </div>
+
+            <button
+              type="button"
+              id="close-assigner-detail"
+              class="btn"
+            >
+              Close
+            </button>
+
+          </div>
+
+          <div
+            class="mt-32"
+            style="font-size: 0.86rem; line-height: 1.9"
+          >
+
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">Customer</span>
+              <strong id="assigner-detail-name"></strong>
+            </div>
+
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">NRC Number</span>
+              <strong id="assigner-detail-nrc"></strong>
+            </div>
+
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">Phone</span>
+              <strong id="assigner-detail-phone"></strong>
+            </div>
+
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">Email</span>
+              <strong id="assigner-detail-email"></strong>
+            </div>
+
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">Category</span>
+              <strong id="assigner-detail-category"></strong>
+            </div>
+
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">Status</span>
+              <strong id="assigner-detail-status"></strong>
+            </div>
+
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">
+                Assigned to
+              </span>
+              <strong id="assigner-detail-assigned"></strong>
+            </div>
+
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">
+                Submitted
+              </span>
+              <strong id="assigner-detail-submitted"></strong>
+            </div>
+
+          </div>
+
+          <hr class="section-divider" />
+
+          <div>
+            <div class="eyebrow">Complaint</div>
+
+            <p
+              id="assigner-detail-description"
+              style="
+                font-size: 0.86rem;
+                line-height: 1.7;
+                margin-top: 10px;
+              "
+            ></p>
+          </div>
+
+          <hr class="section-divider" />
+
+          <!-- Assignment -->
+          <div>
+
+            <h3 style="font-size: 1rem">
+              Assign / Reassign
+            </h3>
+
+            <div class="field mt-16">
+
+              <label for="assigner-staff-select">
+                Staff member
+              </label>
+
+              <select id="assigner-staff-select">
+                <option value="">
+                  Select staff member
+                </option>
+              </select>
+
+            </div>
+
+            <button
+              type="button"
+              id="assigner-assign-btn"
+              class="btn btn-primary btn-block"
+            >
+              Assign complaint
+            </button>
+
+            <p
+              id="assigner-assignment-message"
+              style="
+                font-size: 0.82rem;
+                color: var(--ink-soft);
+                margin-top: 10px;
+              "
+            ></p>
+
+          </div>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
