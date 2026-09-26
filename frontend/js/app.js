@@ -400,21 +400,10 @@ if (assignedSelect) {
     document.getElementById('stat-total').textContent = complaints.length;
   }
 
-  document.getElementById('filter-status').addEventListener('change', render);
-  document.getElementById('filter-category').addEventListener('change', render);
+    document.getElementById('filter-status').addEventListener('change', () => render());
+    document.getElementById('filter-category').addEventListener('change', () => render());
 
   const myAssignedCases = document.getElementById('my-assigned-cases');
-
-  // if (myAssignedCases) {
-  //   myAssignedCases.addEventListener('click', (e) => {
-  //     e.preventDefault();
-
-  //     document.getElementById('filter-status').value = 'all';
-  //     document.getElementById('filter-category').value = 'all';
-
-  //     render(getUser().id);
-  //   });
-  // }
 
   const complaintsQueue = document.querySelector('.sidebar a.active');
 
