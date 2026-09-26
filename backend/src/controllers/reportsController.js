@@ -35,25 +35,6 @@ function summary(req, res) {
   const ackDays = getSetting("acknowledge_days", 2);
   const resolveDays = getSetting("resolve_days", 14);
 
-  // Complaints still open past the acknowledgement window.
-  // function addWorkingDays(date, workingDays) {
-  //   const result = new Date(date);
-  //   let daysAdded = 0;
-
-  //   while (daysAdded < workingDays) {
-  //     result.setDate(result.getDate() + 1);
-
-  //     const day = result.getDay();
-
-  //     // Monday = 1, Friday = 5
-  //     if (day !== 0 && day !== 6) {
-  //       daysAdded++;
-  //     }
-  //   }
-
-  //   return result;
-  // }
-
   const openComplaints = db
     .prepare(
       `SELECT reference, submitted_at

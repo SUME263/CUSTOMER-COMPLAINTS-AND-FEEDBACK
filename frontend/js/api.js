@@ -1,10 +1,7 @@
-/* ===========================================================
-   API client. Talks to the Express backend in /backend.
+/* API client. Talks to the Express backend in /backend.
    Change API_BASE if the backend isn't running on localhost:4000
    (e.g. once frontend and backend are deployed on the same origin,
-   set this to '/api').
-   =========================================================== */
-
+   set this to '/api').*/
 const API_BASE = "http://localhost:4000/api";
 
 function getToken() {
@@ -26,7 +23,7 @@ function getUser() {
   }
 }
 
-/** Redirects to login if there's no session, or the role doesn't match. Returns the user. */
+// Redirects to login if there's no session, or the role doesn't match. Returns the user
 function requireSession(role) {
   const user = getUser();
   if (!user || !getToken() || (role && user.role !== role)) {

@@ -1,7 +1,5 @@
-/* ===========================================================
-   Page logic. Talks to the Express API via api.js (js/api.js
-   must be loaded first on any page that uses this file).
-   =========================================================== */
+/* Page logic. Talks to the Express API via api.js (js/api.js
+   must be loaded first on any page that uses this file).*/
 
 const CATEGORIES = [
   "Loan disbursement delay",
@@ -111,15 +109,30 @@ function initRaiseComplaintForm() {
 async function initNotifications() {
   const notificationList = document.getElementById("notifications-list");
 
-  if (!notificationList) return;
-
   const user = getUser();
 
   if (!user || !getToken()) return;
 
-  const countEl = document.getElementById("notification-count");
-
   const sidebarCountEl = document.getElementById("sidebar-notification-count");
+
+  if (!notificationList) {
+    try {
+      const unread = await api.getUnreadNotificationCount();
+
+      if (sidebarCountEl) {
+        sidebarCountEl.textContent = unread.count;
+        sidebarCountEl.style.display = unread.count > 0 ? "inline-block" : "none";
+      }
+    } catch (error) {
+      console.error("Could not load notification count:", error);
+    }
+
+    return;
+  }
+
+  if (!user || !getToken()) return;
+
+  const countEl = document.getElementById("notification-count");
 
   try {
     const notifications = await api.getNotifications();
@@ -256,7 +269,7 @@ async function initNotifications() {
   notificationRefreshTimer = setTimeout(initNotifications, 30000);
 }
 
-/* -------- Track complaint page -------- */
+// Track complaint page
 function initTrackComplaint() {
   const form = document.getElementById("track-form");
   if (!form) return;
@@ -514,37 +527,6 @@ async function initStaffDashboard() {
   document
     .getElementById("filter-category")
     .addEventListener("change", () => render());
-
-  // const myAssignedCases = document.getElementById('my-assigned-cases');
-
-  // const complaintsQueue = document.querySelector('.sidebar a.active');
-
-  // if (myAssignedCases && complaintsQueue) {
-  //   myAssignedCases.addEventListener('click', (e) => {
-  //     e.preventDefault();
-
-  //     complaintsQueue.classList.remove('active');
-  //     myAssignedCases.classList.add('active');
-
-  //     document.getElementById('filter-status').value = 'all';
-  //     document.getElementById('filter-category').value = 'all';
-
-  //     render(getUser().id);
-  //   });
-
-  //   complaintsQueue.addEventListener('click', (e) => {
-  //     e.preventDefault();
-
-  //     myAssignedCases.classList.remove('active');
-  //     complaintsQueue.classList.add('active');
-
-  //     document.getElementById('filter-status').value = 'all';
-  //     document.getElementById('filter-category').value = 'all';
-
-  //     render();
-  //   });
-  // }
-
   render();
   window.__renderStaffTable = render;
 
@@ -1000,44 +982,42 @@ async function initReportsPage() {
       sidebar.innerHTML = `
         <div class="section-label">System</div>
 
-        <a href="admin-dashboard.html">
-          Compliance overview
-        </a>
-
-        <a href="admin-users.html">
-          User accounts
-        </a>
-
-        <a href="admin-settings.html">
-          System settings
-        </a>
+        <a href="admin-dashboard.html">Compliance overview</a>
+        <a href="admin-users.html">User accounts</a>
+        <a href="admin-settings.html">System settings</a>
 
         <div class="section-label">Reports</div>
-        <a href="reports.html" class="active">
-          Export compliance report
-        </a>
+        <a href="reports.html" class="active">Export compliance report</a>
       `;
-    } else {
+        } else {
       sidebar.innerHTML = `
         <div class="section-label">Workspace</div>
 
-        <a href="staff-dashboard.html">
-          Complaints queue
+        <a href="staff-dashboard.html">Complaints queue</a>
+        <a href="my-assigned-cases.html">My assigned cases</a>
+
+        <a href="staff-dashboard.html#notifications" class="notification-sidebar-link">
+          <span>Notifications</span>
+          <span
+            id="sidebar-notification-count"
+            style="
+              font-size:0.72rem;
+              min-width:20px;
+              text-align:center;
+              padding:2px 6px;
+              border-radius:10px;
+              background:var(--ink);
+              color:white;
+            "
+          >
+            0
+          </span>
         </a>
 
-        <a href="staff-dashboard.html">
-          My assigned cases
-        </a>
-
-        <a href="reports.html" class="active">
-          Reports
-        </a>
+        <a href="reports.html" class="active">Reports</a>
 
         <div class="section-label">Account</div>
-
-        <a href="notification-settings.html">
-          Notification settings
-        </a>
+        <a href="notification-settings.html">Notification settings</a>
       `;
     }
   }
