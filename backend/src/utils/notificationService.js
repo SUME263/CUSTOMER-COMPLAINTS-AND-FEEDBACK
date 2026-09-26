@@ -1,9 +1,10 @@
-const db = require('../config/db');
+const db = require("../config/db");
 
 // The service checks the user's saved preferences before creating a notification.
 function getUserNotificationSettings(userId) {
   const row = db
-    .prepare(`
+    .prepare(
+      `
       SELECT
         new_complaints,
         complaint_assignments,
@@ -11,7 +12,8 @@ function getUserNotificationSettings(userId) {
         deadline_reminders
       FROM notification_settings
       WHERE user_id = ?
-    `)
+    `,
+    )
     .get(userId);
 
   if (!row) {
@@ -45,7 +47,8 @@ function createNotification({
     return false;
   }
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO notifications (
       user_id,
       complaint_id,
@@ -54,13 +57,8 @@ function createNotification({
       message
     )
     VALUES (?, ?, ?, ?, ?)
-  `).run(
-    userId,
-    complaintId,
-    type,
-    title,
-    message
-  );
+  `,
+  ).run(userId, complaintId, type, title, message);
 
   return true;
 }

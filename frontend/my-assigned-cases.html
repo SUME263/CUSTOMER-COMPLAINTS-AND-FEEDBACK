@@ -1,219 +1,229 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Assigned Cases | Complaints & Feedback Portal</title>
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Assigned Cases | Complaints & Feedback Portal</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="index.html" class="brand">
+        <span class="mark">CS</span>
+        <span class="name"
+          >Civil Service & Defence Force Finance<small
+            >Staff workspace</small
+          ></span
+        >
+      </a>
 
-<header class="topbar">
-  <a href="index.html" class="brand">
-    <span class="mark">CS</span>
-    <span class="name">Civil Service & Defence Force Finance<small>Staff workspace</small></span>
-  </a>
+      <nav class="topnav">
+        <span
+          class="current-user-name"
+          style="color: #fff; font-size: 0.9rem"
+        ></span>
+        <a href="#" id="sign-out">Sign out</a>
+      </nav>
+    </header>
 
-  <nav class="topnav">
-    <span class="current-user-name" style="color:#fff; font-size:0.9rem;"></span>
-    <a href="#" id="sign-out">Sign out</a>
-  </nav>
-</header>
+    <div class="app-layout">
+      <aside class="sidebar">
+        <div class="section-label">Workspace</div>
+        <a href="staff-dashboard.html"> Complaints queue </a>
 
-<div class="app-layout">
+        <a href="my-assigned-cases.html" class="active"> My assigned cases </a>
 
-  <aside class="sidebar">
-    <div class="section-label">Workspace</div>
-<a href="staff-dashboard.html">
-  Complaints queue
-</a>
+        <a
+          href="staff-dashboard.html#notifications"
+          class="notification-sidebar-link"
+        >
+          <span>Notifications</span>
+          <span
+            id="sidebar-notification-count"
+            style="
+              font-size: 0.72rem;
+              min-width: 20px;
+              text-align: center;
+              padding: 2px 6px;
+              border-radius: 10px;
+              background: var(--ink);
+              color: white;
+            "
+          >
+            0
+          </span>
+        </a>
 
-<a href="my-assigned-cases.html" class="active">
-  My assigned cases
-</a>
+        <a href="reports.html">Reports</a>
 
-<a href="staff-dashboard.html#notifications" class="notification-sidebar-link">
-  <span>Notifications</span>
-  <span
-    id="sidebar-notification-count"
-    style="
-      font-size:0.72rem;
-      min-width:20px;
-      text-align:center;
-      padding:2px 6px;
-      border-radius:10px;
-      background:var(--ink);
-      color:white;
-    "
-  >
-    0
-  </span>
-</a>
+        <div class="section-label">Account</div>
 
-<a href="reports.html">Reports</a>
+        <a href="notification-settings.html"> Notification settings </a>
+      </aside>
 
-<div class="section-label">Account</div>
+      <main class="main-pane">
+        <div class="flex-between mt-16">
+          <div>
+            <h2>My Assigned Cases</h2>
+            <p
+              style="
+                font-size: 0.86rem;
+                color: var(--ink-soft);
+                margin-top: 8px;
+              "
+            >
+              Complaints currently assigned to you.
+            </p>
+          </div>
+        </div>
 
-<a href="notification-settings.html">
-  Notification settings
-</a>
-  </aside>
+        <div class="stat-row mt-32">
+          <div class="stat-tile">
+            <div class="num" id="stat-open">–</div>
+            <div class="lbl">Open</div>
+          </div>
 
-  <main class="main-pane">
-<div class="flex-between mt-16">
-  <div>
-    <h2>My Assigned Cases</h2>
-    <p style="font-size:0.86rem; color:var(--ink-soft); margin-top:8px;">
-      Complaints currently assigned to you.
-    </p>
-  </div>
-</div>
+          <div class="stat-tile">
+            <div class="num" id="stat-progress">–</div>
+            <div class="lbl">In progress</div>
+          </div>
 
-<div class="stat-row mt-32">
-  <div class="stat-tile">
-    <div class="num" id="stat-open">–</div>
-    <div class="lbl">Open</div>
-  </div>
+          <div class="stat-tile">
+            <div class="num" id="stat-resolved">–</div>
+            <div class="lbl">Resolved</div>
+          </div>
 
-  <div class="stat-tile">
-    <div class="num" id="stat-progress">–</div>
-    <div class="lbl">In progress</div>
-  </div>
+          <div class="stat-tile">
+            <div class="num" id="stat-total">–</div>
+            <div class="lbl">Total assigned</div>
+          </div>
+        </div>
 
-  <div class="stat-tile">
-    <div class="num" id="stat-resolved">–</div>
-    <div class="lbl">Resolved</div>
-  </div>
+        <div class="filter-bar flex-between">
+          <select id="assigned-filter-status">
+            <option value="all">All statuses</option>
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Closed">Closed</option>
+          </select>
 
-  <div class="stat-tile">
-    <div class="num" id="stat-total">–</div>
-    <div class="lbl">Total assigned</div>
-  </div>
-</div>
+          <span
+            id="assigned-result-count"
+            style="font-size: 0.82rem; color: var(--ink-soft)"
+          ></span>
+        </div>
 
-<div class="filter-bar flex-between">
-  <select id="assigned-filter-status">
-    <option value="all">All statuses</option>
-    <option value="Open">Open</option>
-    <option value="In Progress">In Progress</option>
-    <option value="Resolved">Resolved</option>
-    <option value="Closed">Closed</option>
-  </select>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Customer</th>
+              <th>Category</th>
+              <th>Submitted</th>
+              <th>Status</th>
+            </tr>
+          </thead>
 
-  <span
-    id="assigned-result-count"
-    style="font-size:0.82rem; color:var(--ink-soft);"
-  ></span>
-</div>
+          <tbody id="assigned-cases-tbody"></tbody>
+        </table>
 
-<table class="data-table">
-  <thead>
-    <tr>
-      <th>Reference</th>
-      <th>Customer</th>
-      <th>Category</th>
-      <th>Submitted</th>
-      <th>Status</th>
-    </tr>
-  </thead>
+        <div class="hint mt-32">
+          Click a row to review the complaint and update its status.
+        </div>
+      </main>
 
-  <tbody id="assigned-cases-tbody"></tbody>
-</table>
+      <aside
+        style="
+          width: 380px;
+          border-left: 1px solid var(--line);
+          padding: 32px;
+          flex-shrink: 0;
+          background: var(--paper-raise);
+        "
+      >
+        <div id="detail-empty">
+          <div class="eyebrow">Detail</div>
+          <h3>Select a complaint</h3>
+          <p style="font-size: 0.86rem; margin-top: 10px">
+            Click any row to review its full history and post an update.
+          </p>
+        </div>
 
-<div class="hint mt-32">
-  Click a row to review the complaint and update its status.
-</div>
-  </main>
+        <div id="detail-panel" class="hidden">
+          <div class="flex-between">
+            <div class="eyebrow" id="d-ref">CCF-2026-0000</div>
+            <span class="badge" id="d-badge">Open</span>
+          </div>
 
-  <aside style="width:380px; border-left:1px solid var(--line); padding:32px; flex-shrink:0; background:var(--paper-raise);">
+          <div class="mt-32" style="font-size: 0.86rem; line-height: 1.9">
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">Customer</span>
+              <strong id="d-name"></strong>
+            </div>
 
-<div id="detail-empty">
-  <div class="eyebrow">Detail</div>
-  <h3>Select a complaint</h3>
-  <p style="font-size:0.86rem; margin-top:10px;">
-    Click any row to review its full history and post an update.
-  </p>
-</div>
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">Service number</span>
+              <strong id="d-service"></strong>
+            </div>
 
-<div id="detail-panel" class="hidden">
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">Category</span>
+              <strong id="d-category"></strong>
+            </div>
 
-  <div class="flex-between">
-    <div class="eyebrow" id="d-ref">CCF-2026-0000</div>
-    <span class="badge" id="d-badge">Open</span>
-  </div>
+            <div class="flex-between">
+              <span style="color: var(--ink-soft)">Submitted</span>
+              <strong id="d-submitted"></strong>
+            </div>
+          </div>
 
-  <div class="mt-32" style="font-size:0.86rem; line-height:1.9;">
-    <div class="flex-between">
-      <span style="color:var(--ink-soft)">Customer</span>
-      <strong id="d-name"></strong>
+          <hr class="section-divider" />
+
+          <form id="detail-form">
+            <div class="field">
+              <label for="d-assigned">Assigned to</label>
+              <select id="d-assigned">
+                <option value="">Unassigned</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="d-status-select">Update status</label>
+              <select id="d-status-select">
+                <option>Open</option>
+                <option>In Progress</option>
+                <option>Resolved</option>
+                <option>Closed</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="d-note"
+                >Note (visible to customer on tracking page) *</label
+              >
+              <textarea
+                id="d-note"
+                placeholder="Explain what was done or found."
+                required
+              ></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+              Post update
+            </button>
+          </form>
+
+          <hr class="section-divider" />
+
+          <h3 style="font-size: 1rem">Case history</h3>
+          <div id="d-log" class="mt-32"></div>
+        </div>
+      </aside>
     </div>
 
-    <div class="flex-between">
-      <span style="color:var(--ink-soft)">Service number</span>
-      <strong id="d-service"></strong>
-    </div>
+    <script src="js/api.js"></script>
 
-    <div class="flex-between">
-      <span style="color:var(--ink-soft)">Category</span>
-      <strong id="d-category"></strong>
-    </div>
-
-    <div class="flex-between">
-      <span style="color:var(--ink-soft)">Submitted</span>
-      <strong id="d-submitted"></strong>
-    </div>
-  </div>
-
-  <hr class="section-divider">
-
-  <form id="detail-form">
-
-    <div class="field">
-      <label for="d-assigned">Assigned to</label>
-      <select id="d-assigned">
-        <option value="">Unassigned</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="d-status-select">Update status</label>
-      <select id="d-status-select">
-        <option>Open</option>
-        <option>In Progress</option>
-        <option>Resolved</option>
-        <option>Closed</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="d-note">Note (visible to customer on tracking page) *</label>
-      <textarea
-        id="d-note"
-        placeholder="Explain what was done or found."
-        required
-      ></textarea>
-    </div>
-
-    <button type="submit" class="btn btn-primary btn-block">
-      Post update
-    </button>
-
-  </form>
-
-  <hr class="section-divider">
-
-  <h3 style="font-size:1rem;">Case history</h3>
-  <div id="d-log" class="mt-32"></div>
-
-</div>
-
-  </aside>
-
-</div>
-
-<script src="js/api.js"></script>
-
-<script src="js/app.js"></script>
-
-</body>
+    <script src="js/app.js"></script>
+  </body>
 </html>

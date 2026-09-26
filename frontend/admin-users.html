@@ -1,131 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User Accounts | Complaints & Feedback Portal</title>
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Accounts | Complaints & Feedback Portal</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="index.html" class="brand">
+        <span class="mark">CS</span>
+        <span class="name"
+          >Civil Service & Defence Force Finance<small
+            >System administration</small
+          ></span
+        >
+      </a>
+      <nav class="topnav">
+        <span
+          class="current-user-name"
+          style="color: #fff; font-size: 0.9rem"
+        ></span>
+        <a href="#" id="sign-out">Sign out</a>
+      </nav>
+    </header>
 
-<header class="topbar">
-  <a href="index.html" class="brand">
-    <span class="mark">CS</span>
-    <span class="name">Civil Service & Defence Force Finance<small>System administration</small></span>
-  </a>
-  <nav class="topnav">
-    <span class="current-user-name" style="color:#fff; font-size:0.9rem;"></span>
-    <a href="#" id="sign-out">Sign out</a>
-  </nav>
-</header>
+    <div class="app-layout">
+      <aside class="sidebar">
+        <div class="section-label">System</div>
+        <a href="admin-dashboard.html">Compliance overview</a>
+        <a href="admin-users.html" class="active">User accounts</a>
+        <a href="admin-settings.html">System settings</a>
 
-<div class="app-layout">
+        <div class="section-label">Reports</div>
+        <a href="reports.html">Export compliance report</a>
+      </aside>
 
-  <aside class="sidebar">
-    <div class="section-label">System</div>
-    <a href="admin-dashboard.html">Compliance overview</a>
-    <a href="admin-users.html" class="active">User accounts</a>
-    <a href="admin-settings.html">System settings</a>
+      <main class="main-pane" style="max-width: 1100px">
+        <div class="eyebrow">System administration</div>
 
-    <div class="section-label">Reports</div>
-    <a href="reports.html">Export compliance report</a>
-  </aside>
+        <div class="flex-between">
+          <div>
+            <h2>User accounts</h2>
+            <p style="margin-top: 10px">
+              Manage staff and administrator accounts and their access status.
+            </p>
+          </div>
 
-  <main class="main-pane" style="max-width:1100px;">
+          <button class="btn btn-primary" id="add-user-btn">Add account</button>
+        </div>
 
-<div class="eyebrow">System administration</div>
+        <div id="form-container" class="panel mt-32 hidden">
+          <h3 id="form-title">Add account</h3>
 
-<div class="flex-between">
-  <div>
-    <h2>User accounts</h2>
-    <p style="margin-top:10px;">
-      Manage staff and administrator accounts and their access status.
-    </p>
-  </div>
+          <form id="user-form" style="margin-top: 24px">
+            <div class="field-row">
+              <div class="field">
+                <label for="user-name">Full name</label>
+                <input type="text" id="user-name" required />
+              </div>
 
-  <button class="btn btn-primary" id="add-user-btn">
-    Add account
-  </button>
-</div>
+              <div class="field">
+                <label for="user-email">Email address</label>
+                <input type="email" id="user-email" required />
+              </div>
+            </div>
 
-<div id="form-container" class="panel mt-32 hidden">
-  <h3 id="form-title">Add account</h3>
+            <div class="field-row">
+              <div class="field">
+                <label for="user-password">Password</label>
+                <input type="password" id="user-password" required />
+              </div>
 
-  <form id="user-form" style="margin-top:24px;">
+              <div class="field">
+                <label for="user-role">Role</label>
+                <select id="user-role" required>
+                  <option value="staff">Staff</option>
+                  <option value="admin">Administrator</option>
+                </select>
+              </div>
+            </div>
 
-    <div class="field-row">
+            <div class="field">
+              <label for="user-branch">Branch</label>
+              <input type="text" id="user-branch" placeholder="e.g. Lusaka" />
+            </div>
 
-      <div class="field">
-        <label for="user-name">Full name</label>
-        <input type="text" id="user-name" required>
-      </div>
+            <div id="user-form-error"></div>
 
-      <div class="field">
-        <label for="user-email">Email address</label>
-        <input type="email" id="user-email" required>
-      </div>
+            <div style="display: flex; gap: 12px">
+              <button type="submit" class="btn btn-primary">
+                Create account
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="cancel-user-btn"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
 
+        <hr class="section-divider" />
+
+        <div id="table-error"></div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Branch</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </main>
     </div>
 
-    <div class="field-row">
+    <script src="js/api.js"></script>
 
-      <div class="field">
-        <label for="user-password">Password</label>
-        <input type="password" id="user-password" required>
-      </div>
-
-      <div class="field">
-        <label for="user-role">Role</label>
-        <select id="user-role" required>
-          <option value="staff">Staff</option>
-          <option value="admin">Administrator</option>
-        </select>
-      </div>
-
-    </div>
-
-    <div class="field">
-      <label for="user-branch">Branch</label>
-      <input type="text" id="user-branch" placeholder="e.g. Lusaka">
-    </div>
-
-    <div id="user-form-error"></div>
-
-    <div style="display:flex; gap:12px;">
-      <button type="submit" class="btn btn-primary">Create account</button>
-      <button type="button" class="btn btn-secondary" id="cancel-user-btn">Cancel</button>
-    </div>
-
-  </form>
-</div>
-
-<hr class="section-divider">
-
-<div id="table-error"></div>
-
-<table class="data-table">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Role</th>
-      <th>Branch</th>
-      <th>Status</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-
-  <tbody id="users-tbody"></tbody>
-</table>
-
-
-  </main>
-</div>
-
-<script src="js/api.js"></script>
-
-<script src="js/app.js"></script>
-
-</body>
+    <script src="js/app.js"></script>
+  </body>
 </html>

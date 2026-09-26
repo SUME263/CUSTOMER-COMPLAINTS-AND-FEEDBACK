@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require("../config/db");
 
 const DEFAULT_SETTINGS = {
   acknowledge_days: 2,
@@ -7,7 +7,7 @@ const DEFAULT_SETTINGS = {
 
 function getSetting(key) {
   const row = db
-    .prepare('SELECT setting_value FROM system_settings WHERE setting_key = ?')
+    .prepare("SELECT setting_value FROM system_settings WHERE setting_key = ?")
     .get(key);
 
   if (row) {
@@ -22,8 +22,8 @@ function getSetting(key) {
  */
 function getSettings(req, res) {
   res.json({
-    acknowledgeDays: getSetting('acknowledge_days'),
-    resolveDays: getSetting('resolve_days'),
+    acknowledgeDays: getSetting("acknowledge_days"),
+    resolveDays: getSetting("resolve_days"),
   });
 }
 
@@ -38,7 +38,7 @@ function updateSettings(req, res) {
     (!Number.isInteger(acknowledgeDays) || acknowledgeDays < 1)
   ) {
     return res.status(400).json({
-      error: 'Acknowledgement days must be a whole number greater than 0.',
+      error: "Acknowledgement days must be a whole number greater than 0.",
     });
   }
 
@@ -47,13 +47,13 @@ function updateSettings(req, res) {
     (!Number.isInteger(resolveDays) || resolveDays < 1)
   ) {
     return res.status(400).json({
-      error: 'Resolution days must be a whole number greater than 0.',
+      error: "Resolution days must be a whole number greater than 0.",
     });
   }
 
   if (acknowledgeDays === undefined && resolveDays === undefined) {
     return res.status(400).json({
-      error: 'At least one setting must be provided.',
+      error: "At least one setting must be provided.",
     });
   }
 
@@ -68,20 +68,20 @@ function updateSettings(req, res) {
 
   const update = db.transaction(() => {
     if (acknowledgeDays !== undefined) {
-      upsert.run('acknowledge_days', String(acknowledgeDays));
+      upsert.run("acknowledge_days", String(acknowledgeDays));
     }
 
     if (resolveDays !== undefined) {
-      upsert.run('resolve_days', String(resolveDays));
+      upsert.run("resolve_days", String(resolveDays));
     }
   });
 
   update();
 
   res.json({
-    message: 'Settings updated successfully.',
-    acknowledgeDays: getSetting('acknowledge_days'),
-    resolveDays: getSetting('resolve_days'),
+    message: "Settings updated successfully.",
+    acknowledgeDays: getSetting("acknowledge_days"),
+    resolveDays: getSetting("resolve_days"),
   });
 }
 

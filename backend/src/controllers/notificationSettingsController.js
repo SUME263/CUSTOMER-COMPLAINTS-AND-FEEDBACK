@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require("../config/db");
 
 const DEFAULT_SETTINGS = {
   newComplaints: true,
@@ -11,7 +11,8 @@ function getSettings(req, res) {
   const userId = req.user.id;
 
   const row = db
-    .prepare(`
+    .prepare(
+      `
       SELECT
         new_complaints,
         complaint_assignments,
@@ -19,7 +20,8 @@ function getSettings(req, res) {
         deadline_reminders
       FROM notification_settings
       WHERE user_id = ?
-    `)
+    `,
+    )
     .get(userId);
 
   if (!row) {
@@ -52,14 +54,15 @@ function updateSettings(req, res) {
   };
 
   for (const [key, value] of Object.entries(settings)) {
-    if (typeof value !== 'boolean') {
+    if (typeof value !== "boolean") {
       return res.status(400).json({
         error: `${key} must be true or false.`,
       });
     }
   }
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO notification_settings (
       user_id,
       new_complaints,
@@ -76,16 +79,17 @@ function updateSettings(req, res) {
       status_updates = excluded.status_updates,
       deadline_reminders = excluded.deadline_reminders,
       updated_at = datetime('now')
-  `).run(
+  `,
+  ).run(
     userId,
     newComplaints ? 1 : 0,
     complaintAssignments ? 1 : 0,
     statusUpdates ? 1 : 0,
-    deadlineReminders ? 1 : 0
+    deadlineReminders ? 1 : 0,
   );
 
   res.json({
-    message: 'Notification settings saved successfully.',
+    message: "Notification settings saved successfully.",
     newComplaints,
     complaintAssignments,
     statusUpdates,

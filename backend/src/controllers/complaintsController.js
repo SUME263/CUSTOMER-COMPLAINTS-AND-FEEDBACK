@@ -1,8 +1,8 @@
-const db = require('../config/db');
-const { createNotification, } = require('../utils/notificationService');
-const { generateReference } = require('../utils/reference');
+const db = require("../config/db");
+const { createNotification } = require("../utils/notificationService");
+const { generateReference } = require("../utils/reference");
 
-const VALID_STATUSES = ['Open', 'In Progress', 'Resolved', 'Closed'];
+const VALID_STATUSES = ["Open", "In Progress", "Resolved", "Closed"];
 
 function serializeComplaint(row) {
   return {
@@ -15,7 +15,7 @@ function serializeComplaint(row) {
     category: row.category,
     description: row.description,
     status: row.status,
-    assigned: row.assigned_name || 'Unassigned',
+    assigned: row.assigned_name || "Unassigned",
     assignedId: row.assigned_to,
     submitted: row.submitted_at,
     updated: row.updated_at,
@@ -29,7 +29,7 @@ function attachLog(complaintId) {
        FROM complaint_logs l
        LEFT JOIN users u ON u.id = l.created_by
        WHERE l.complaint_id = ?
-       ORDER BY l.created_at ASC, l.id ASC`
+       ORDER BY l.created_at ASC, l.id ASC`,
     )
     .all(complaintId);
 }
@@ -39,7 +39,11 @@ function create(req, res) {
   const { name, service, phone, email, category, description } = req.body;
 
   if (!name || !service || !category || !description) {
-    return res.status(400).json({ error: 'Name, service number, category and description are required.' });
+    return res
+      .status(400)
+      .json({
+        error: "Name, service number, category and description are required.",
+      });
   }
 
   const reference = generateReference();
@@ -55,34 +59,44 @@ function create(req, res) {
   `);
 
   const run = db.transaction(() => {
-    const info = insertComplaint.run(reference, name, service, phone || null, email || null, category, description, now, now);
+    const info = insertComplaint.run(
+      reference,
+      name,
+      service,
+      phone || null,
+      email || null,
+      category,
+      description,
+      now,
+      now,
+    );
     insertLog.run(info.lastInsertRowid, now);
     return info.lastInsertRowid;
   });
 
   const id = run();
 
-  const row = db
-    .prepare('SELECT * FROM complaints WHERE id = ?')
-    .get(id);
+  const row = db.prepare("SELECT * FROM complaints WHERE id = ?").get(id);
 
   const activeStaff = db
-    .prepare(`
+    .prepare(
+      `
       SELECT id
       FROM users
       WHERE role = 'staff'
         AND status = 'active'
-    `)
+    `,
+    )
     .all();
 
-  activeStaff.forEach(staff => {
+  activeStaff.forEach((staff) => {
     createNotification({
       userId: staff.id,
       complaintId: id,
-      type: 'new_complaint',
-      title: 'New complaint received',
+      type: "new_complaint",
+      title: "New complaint received",
       message: `${reference} has been submitted and is awaiting review.`,
-      settingKey: 'newComplaints',
+      settingKey: "newComplaints",
     });
   });
 
@@ -93,8 +107,13 @@ function create(req, res) {
 
 /** GET /api/complaints/track/:reference — public. Track by reference number. */
 function trackByReference(req, res) {
-  const row = db.prepare('SELECT * FROM complaints WHERE reference = ?').get(req.params.reference.trim());
-  if (!row) return res.status(404).json({ error: 'No complaint found with that reference number.' });
+  const row = db
+    .prepare("SELECT * FROM complaints WHERE reference = ?")
+    .get(req.params.reference.trim());
+  if (!row)
+    return res
+      .status(404)
+      .json({ error: "No complaint found with that reference number." });
 
   const complaint = serializeComplaint(row);
   complaint.log = attachLog(row.id);
@@ -112,22 +131,22 @@ function list(req, res) {
   `;
   const params = [];
 
-  if (status && status !== 'all') {
-    sql += ' AND c.status = ?';
+  if (status && status !== "all") {
+    sql += " AND c.status = ?";
     params.push(status);
   }
 
-  if (category && category !== 'all') {
-    sql += ' AND c.category = ?';
+  if (category && category !== "all") {
+    sql += " AND c.category = ?";
     params.push(category);
   }
 
-  if (assignedTo && assignedTo !== 'all') {
-    sql += ' AND c.assigned_to = ?';
+  if (assignedTo && assignedTo !== "all") {
+    sql += " AND c.assigned_to = ?";
     params.push(Number(assignedTo));
   }
 
-  sql += ' ORDER BY c.submitted_at DESC';
+  sql += " ORDER BY c.submitted_at DESC";
 
   const rows = db.prepare(sql).all(...params);
   res.json({ complaints: rows.map(serializeComplaint) });
@@ -139,10 +158,10 @@ function getById(req, res) {
     .prepare(
       `SELECT c.*, u.name AS assigned_name
        FROM complaints c LEFT JOIN users u ON u.id = c.assigned_to
-       WHERE c.id = ?`
+       WHERE c.id = ?`,
     )
     .get(req.params.id);
-  if (!row) return res.status(404).json({ error: 'Complaint not found.' });
+  if (!row) return res.status(404).json({ error: "Complaint not found." });
 
   const complaint = serializeComplaint(row);
   complaint.log = attachLog(row.id);
@@ -152,13 +171,15 @@ function getById(req, res) {
 /** GET /api/complaints/assignees — staff/admin. List active staff accounts. */
 function listAssignees(req, res) {
   const rows = db
-    .prepare(`
+    .prepare(
+      `
       SELECT id, name, email, branch
       FROM users
       WHERE role = 'staff'
         AND status = 'active'
       ORDER BY name ASC
-    `)
+    `,
+    )
     .all();
 
   res.json({ users: rows });
@@ -167,14 +188,18 @@ function listAssignees(req, res) {
 /** PATCH /api/complaints/:id — staff/admin. Update status/assignment, append a log entry. */
 function update(req, res) {
   const { status, note, assignedTo } = req.body;
-  const existing = db.prepare('SELECT * FROM complaints WHERE id = ?').get(req.params.id);
-  if (!existing) return res.status(404).json({ error: 'Complaint not found.' });
+  const existing = db
+    .prepare("SELECT * FROM complaints WHERE id = ?")
+    .get(req.params.id);
+  if (!existing) return res.status(404).json({ error: "Complaint not found." });
 
   if (!note || !note.trim()) {
-    return res.status(400).json({ error: 'A note is required for every status update.' });
+    return res
+      .status(400)
+      .json({ error: "A note is required for every status update." });
   }
   if (status && !VALID_STATUSES.includes(status)) {
-    return res.status(400).json({ error: 'Invalid status value.' });
+    return res.status(400).json({ error: "Invalid status value." });
   }
 
   const newStatus = status || existing.status;
@@ -185,11 +210,13 @@ function update(req, res) {
 
   if (assignedTo) {
     const assignedUser = db
-      .prepare('SELECT name FROM users WHERE id = ? AND role = ?')
-      .get(assignedTo, 'staff');
+      .prepare("SELECT name FROM users WHERE id = ? AND role = ?")
+      .get(assignedTo, "staff");
 
     if (!assignedUser) {
-      return res.status(400).json({ error: 'Selected staff member was not found.' });
+      return res
+        .status(400)
+        .json({ error: "Selected staff member was not found." });
     }
 
     assignmentName = assignedUser.name;
@@ -199,51 +226,41 @@ function update(req, res) {
     db.prepare(
       `UPDATE complaints
       SET status = ?, assigned_to = COALESCE(?, assigned_to), updated_at = ?
-      WHERE id = ?`
+      WHERE id = ?`,
     ).run(newStatus, assignedTo || null, now, existing.id);
 
     let logNote = note.trim();
 
-    if (
-      assignedTo &&
-      Number(assignedTo) !== Number(existing.assigned_to)
-    ) {
+    if (assignedTo && Number(assignedTo) !== Number(existing.assigned_to)) {
       logNote = `Assigned to ${assignmentName}. ${logNote}`;
     }
 
-    if (
-      newStatus &&
-      newStatus !== existing.status &&
-      existing.assigned_to
-    ) {
+    if (newStatus && newStatus !== existing.status && existing.assigned_to) {
       createNotification({
         userId: Number(existing.assigned_to),
         complaintId: existing.id,
-        type: 'status_update',
-        title: 'Complaint status updated',
+        type: "status_update",
+        title: "Complaint status updated",
         message: `${existing.reference} has been moved to ${newStatus}.`,
-        settingKey: 'statusUpdates',
+        settingKey: "statusUpdates",
       });
     }
 
-    if (
-      assignedTo &&
-      Number(assignedTo) !== Number(existing.assigned_to)
-    ) {
+    if (assignedTo && Number(assignedTo) !== Number(existing.assigned_to)) {
       createNotification({
         userId: Number(assignedTo),
         complaintId: existing.id,
-        type: 'assignment',
-        title: 'Complaint assigned to you',
+        type: "assignment",
+        title: "Complaint assigned to you",
         message: `${existing.reference} has been assigned to you for review.`,
-        settingKey: 'complaintAssignments',
+        settingKey: "complaintAssignments",
       });
     }
 
     db.prepare(
       `INSERT INTO complaint_logs
       (complaint_id, status, note, created_by, created_at)
-      VALUES (?, ?, ?, ?, ?)`
+      VALUES (?, ?, ?, ?, ?)`,
     ).run(existing.id, newStatus, logNote, req.user.id, now);
   });
 
@@ -251,7 +268,7 @@ function update(req, res) {
 
   const row = db
     .prepare(
-      `SELECT c.*, u.name AS assigned_name FROM complaints c LEFT JOIN users u ON u.id = c.assigned_to WHERE c.id = ?`
+      `SELECT c.*, u.name AS assigned_name FROM complaints c LEFT JOIN users u ON u.id = c.assigned_to WHERE c.id = ?`,
     )
     .get(existing.id);
   const complaint = serializeComplaint(row);
@@ -259,4 +276,11 @@ function update(req, res) {
   res.json({ complaint });
 }
 
-module.exports = { create, trackByReference, list, getById, update, listAssignees };
+module.exports = {
+  create,
+  trackByReference,
+  list,
+  getById,
+  update,
+  listAssignees,
+};

@@ -26,10 +26,10 @@ npm start          # http://localhost:4000
 
 Demo accounts (created by `npm run seed`):
 
-| Role  | Email               | Password   |
-|-------|---------------------|------------|
-| Staff | b.tembo@ccf.local   | Staff123!  |
-| Admin | s.mwape@ccf.local   | Admin123!  |
+| Role  | Email             | Password  |
+| ----- | ----------------- | --------- |
+| Staff | b.tembo@ccf.local | Staff123! |
+| Admin | s.mwape@ccf.local | Admin123! |
 
 **2. Frontend**
 

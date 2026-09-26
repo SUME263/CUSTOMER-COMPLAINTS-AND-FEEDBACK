@@ -1,100 +1,147 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Raise a Complaint | Civil Service & Defence Force Loans</title>
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raise a Complaint | Civil Service & Defence Force Loans</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="index.html" class="brand">
+        <span class="mark">CS</span>
+        <span class="name"
+          >Civil Service & Defence Force Finance<small
+            >Complaints & Feedback Portal</small
+          ></span
+        >
+      </a>
+      <nav class="topnav">
+        <a href="track-complaint.html">Track a complaint</a>
+        <span class="divider"></span>
+        <a href="login.html">Staff / admin sign in</a>
+      </nav>
+    </header>
 
-<header class="topbar">
-  <a href="index.html" class="brand">
-    <span class="mark">CS</span>
-    <span class="name">Civil Service & Defence Force Finance<small>Complaints & Feedback Portal</small></span>
-  </a>
-  <nav class="topnav">
-    <a href="track-complaint.html">Track a complaint</a>
-    <span class="divider"></span>
-    <a href="login.html">Staff / admin sign in</a>
-  </nav>
-</header>
+    <div class="shell narrow">
+      <div class="eyebrow">Step 1 of 1</div>
+      <h1 style="font-size: 2rem">Raise a complaint</h1>
+      <p style="margin-top: 12px">
+        Fields marked * are required. You'll receive a reference number
+        immediately after submitting — keep it to track progress.
+      </p>
 
-<div class="shell narrow">
-  <div class="eyebrow">Step 1 of 1</div>
-  <h1 style="font-size:2rem;">Raise a complaint</h1>
-  <p style="margin-top:12px;">Fields marked * are required. You'll receive a reference number immediately after submitting — keep it to track progress.</p>
+      <form id="complaint-form" class="panel mt-32">
+        <div class="field-row">
+          <div class="field">
+            <label for="full-name">Full name *</label>
+            <input
+              type="text"
+              id="full-name"
+              placeholder="e.g. Mutale Chanda"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="service-number">Service / staff number *</label>
+            <input
+              type="text"
+              id="service-number"
+              placeholder="e.g. MOD-88213"
+              required
+            />
+          </div>
+        </div>
 
-  <form id="complaint-form" class="panel mt-32">
-    <div class="field-row">
-      <div class="field">
-        <label for="full-name">Full name *</label>
-        <input type="text" id="full-name" placeholder="e.g. Mutale Chanda" required>
+        <div class="field-row">
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input type="tel" id="phone" placeholder="e.g. 097 123 4567" />
+          </div>
+          <div class="field">
+            <label for="email">Email address</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="e.g. name@example.com"
+            />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="category">Complaint category *</label>
+          <select id="category" required>
+            <option value="" disabled selected>Select the closest match</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="description">What happened? *</label>
+          <textarea
+            id="description"
+            placeholder="Describe the issue, including any relevant dates or amounts."
+            required
+          ></textarea>
+          <div class="hint">
+            You don't need to be formal — write it as you'd explain it to a
+            branch officer.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="attachment">Supporting document (optional)</label>
+          <input type="file" id="attachment" />
+          <div class="hint">
+            Statements, screenshots or receipts help us resolve your complaint
+            faster.
+          </div>
+        </div>
+
+        <div class="checkbox-field mt-32">
+          <input type="checkbox" id="consent" required />
+          <label for="consent"
+            >I understand my information will be used to investigate and respond
+            to this complaint, and stored securely in line with the
+            institution's data protection policy.</label
+          >
+        </div>
+
+        <div class="mt-32">
+          <button type="submit" class="btn btn-primary btn-block">
+            Submit complaint
+          </button>
+        </div>
+      </form>
+
+      <div id="confirmation-panel" class="panel mt-32 hidden">
+        <div class="eyebrow">Complaint received</div>
+        <h2>Your reference number</h2>
+        <p style="margin-top: 12px">
+          Save this — you'll need it to track progress. We aim to acknowledge
+          every complaint within 2 working days.
+        </p>
+        <div class="ref-tag mt-32" id="confirm-ref">CCF-2026-0000</div>
+        <div style="margin-top: 28px; display: flex; gap: 12px">
+          <a href="#" id="confirm-track-link" class="btn btn-primary"
+            >Track this complaint</a
+          >
+          <a href="index.html" class="btn btn-secondary">Back to home</a>
+        </div>
       </div>
-      <div class="field">
-        <label for="service-number">Service / staff number *</label>
-        <input type="text" id="service-number" placeholder="e.g. MOD-88213" required>
-      </div>
     </div>
 
-    <div class="field-row">
-      <div class="field">
-        <label for="phone">Phone number</label>
-        <input type="tel" id="phone" placeholder="e.g. 097 123 4567">
-      </div>
-      <div class="field">
-        <label for="email">Email address</label>
-        <input type="email" id="email" placeholder="e.g. name@example.com">
-      </div>
-    </div>
+    <footer class="site-footer">
+      <span
+        >&copy; 2026 Civil Service & Defence Force Finance. Complaints handled
+        under BoZ Directive.</span
+      >
+      <span
+        >Prototype interface — Customer Complaints and Feedback Handling
+        System</span
+      >
+    </footer>
 
-    <div class="field">
-      <label for="category">Complaint category *</label>
-      <select id="category" required>
-        <option value="" disabled selected>Select the closest match</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="description">What happened? *</label>
-      <textarea id="description" placeholder="Describe the issue, including any relevant dates or amounts." required></textarea>
-      <div class="hint">You don't need to be formal — write it as you'd explain it to a branch officer.</div>
-    </div>
-
-    <div class="field">
-      <label for="attachment">Supporting document (optional)</label>
-      <input type="file" id="attachment">
-      <div class="hint">Statements, screenshots or receipts help us resolve your complaint faster.</div>
-    </div>
-
-    <div class="checkbox-field mt-32">
-      <input type="checkbox" id="consent" required>
-      <label for="consent">I understand my information will be used to investigate and respond to this complaint, and stored securely in line with the institution's data protection policy.</label>
-    </div>
-
-    <div class="mt-32">
-      <button type="submit" class="btn btn-primary btn-block">Submit complaint</button>
-    </div>
-  </form>
-
-  <div id="confirmation-panel" class="panel mt-32 hidden">
-    <div class="eyebrow">Complaint received</div>
-    <h2>Your reference number</h2>
-    <p style="margin-top:12px;">Save this — you'll need it to track progress. We aim to acknowledge every complaint within 2 working days.</p>
-    <div class="ref-tag mt-32" id="confirm-ref">CCF-2026-0000</div>
-    <div style="margin-top:28px; display:flex; gap:12px;">
-      <a href="#" id="confirm-track-link" class="btn btn-primary">Track this complaint</a>
-      <a href="index.html" class="btn btn-secondary">Back to home</a>
-    </div>
-  </div>
-</div>
-
-<footer class="site-footer">
-  <span>&copy; 2026 Civil Service & Defence Force Finance. Complaints handled under BoZ Directive.</span>
-  <span>Prototype interface — Customer Complaints and Feedback Handling System</span>
-</footer>
-
-<script src="js/api.js"></script>
-<script src="js/app.js"></script>
-</body>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+  </body>
 </html>
