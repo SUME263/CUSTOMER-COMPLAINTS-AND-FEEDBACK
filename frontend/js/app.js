@@ -379,22 +379,22 @@ async function initMyAssignedCases() {
     el.textContent = `${user.name} — ${user.branch || "Staff"}`;
   });
 
-  const assignedSelect = document.getElementById("d-assigned");
+  // const assignedSelect = document.getElementById("d-assigned");
 
-  if (assignedSelect) {
-    try {
-      const { users } = await apiFetch("/complaints/assignees");
+  // if (assignedSelect) {
+  //   try {
+  //     const { users } = await apiFetch("/complaints/assignees");
 
-      users.forEach((staff) => {
-        const option = document.createElement("option");
-        option.value = staff.id;
-        option.textContent = `${staff.name}${staff.branch ? ` — ${staff.branch}` : ""}`;
-        assignedSelect.appendChild(option);
-      });
-    } catch (err) {
-      console.error("Could not load staff accounts:", err);
-    }
-  }
+  //     users.forEach((staff) => {
+  //       const option = document.createElement("option");
+  //       option.value = staff.id;
+  //       option.textContent = `${staff.name}${staff.branch ? ` — ${staff.branch}` : ""}`;
+  //       assignedSelect.appendChild(option);
+  //     });
+  //   } catch (err) {
+  //     console.error("Could not load staff accounts:", err);
+  //   }
+  // }
 
   async function renderAssignedCases() {
     const status = document.getElementById("assigned-filter-status").value;
@@ -470,22 +470,22 @@ async function initStaffDashboard() {
     el.textContent = `${user.name} — ${user.branch || "Staff"}`;
   });
 
-  const assignedSelect = document.getElementById("d-assigned");
+  // const assignedSelect = document.getElementById("d-assigned");
 
-  if (assignedSelect) {
-    try {
-      const { users } = await apiFetch("/complaints/assignees");
+  // if (assignedSelect) {
+  //   try {
+  //     const { users } = await apiFetch("/complaints/assignees");
 
-      users.forEach((staff) => {
-        const option = document.createElement("option");
-        option.value = staff.id;
-        option.textContent = `${staff.name}${staff.branch ? ` — ${staff.branch}` : ""}`;
-        assignedSelect.appendChild(option);
-      });
-    } catch (err) {
-      console.error("Could not load staff accounts:", err);
-    }
-  }
+  //     users.forEach((staff) => {
+  //       const option = document.createElement("option");
+  //       option.value = staff.id;
+  //       option.textContent = `${staff.name}${staff.branch ? ` — ${staff.branch}` : ""}`;
+  //       assignedSelect.appendChild(option);
+  //     });
+  //   } catch (err) {
+  //     console.error("Could not load staff accounts:", err);
+  //   }
+  // }
 
   const catFilter = document.getElementById("filter-category");
   CATEGORIES.forEach((c) => {
@@ -569,12 +569,12 @@ async function openDetail(id) {
   document.getElementById("d-badge").textContent = c.status;
   document.getElementById("d-badge").className =
     "badge " + statusBadgeClass(c.status);
-  document.getElementById("d-assigned").value = c.assignedId || "";
 
   document.getElementById("d-status-select").value = c.status;
 
   const log = document.getElementById("d-log");
   log.innerHTML = "";
+
   c.log
     .slice()
     .reverse()
@@ -582,26 +582,45 @@ async function openDetail(id) {
       const div = document.createElement("div");
       div.className = "note-box";
       div.style.marginBottom = "10px";
-      div.innerHTML = `<div class="flex-between"><strong style="font-size:0.82rem">${entry.status}</strong><span style="font-size:0.76rem;color:var(--ink-soft)">${formatDate(entry.date)}</span></div><p style="margin:6px 0 0;font-size:0.84rem">${entry.note}</p>`;
+
+      div.innerHTML = `
+        <div class="flex-between">
+          <strong style="font-size:0.82rem">${entry.status}</strong>
+          <span style="font-size:0.76rem;color:var(--ink-soft)">
+            ${formatDate(entry.date)}
+          </span>
+        </div>
+        <p style="margin:6px 0 0;font-size:0.84rem">${entry.note}</p>
+      `;
+
       log.appendChild(div);
     });
 
   const form = document.getElementById("detail-form");
+
   form.onsubmit = async function (e) {
     e.preventDefault();
+
     const note = document.getElementById("d-note").value.trim();
+
     if (!note) return;
+
     const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
+
     try {
       await api.updateComplaint(id, {
         status: document.getElementById("d-status-select").value,
         note,
-        assignedTo: document.getElementById("d-assigned").value || null,
       });
+
       document.getElementById("d-note").value = "";
+
       await openDetail(id);
-      if (window.__renderStaffTable) window.__renderStaffTable();
+
+      if (window.__renderStaffTable) {
+        window.__renderStaffTable();
+      }
     } catch (err) {
       showFormError(form, err.message);
     } finally {
