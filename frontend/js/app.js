@@ -70,17 +70,19 @@ function initRaiseComplaintForm() {
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
     const submitBtn = form.querySelector('button[type="submit"]');
+
     const payload = {
       name: document.getElementById("full-name").value.trim(),
-      service: document.getElementById("service-number").value.trim(),
+      nrc: document.getElementById("nrc-number").value.trim(),
       phone: document.getElementById("phone").value.trim() || null,
       email: document.getElementById("email").value.trim() || null,
       category: document.getElementById("category").value,
       description: document.getElementById("description").value.trim(),
     };
+
     if (
       !payload.name ||
-      !payload.service ||
+      !payload.nrc ||
       !payload.category ||
       !payload.description
     )
@@ -88,12 +90,17 @@ function initRaiseComplaintForm() {
 
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting…";
+
     try {
       const { complaint } = await api.raiseComplaint(payload);
+
       form.classList.add("hidden");
       confirmPanel.classList.remove("hidden");
+
       document.getElementById("confirm-ref").textContent = complaint.ref;
+
       const link = document.getElementById("confirm-track-link");
+
       if (link)
         link.href =
           "track-complaint.html?ref=" + encodeURIComponent(complaint.ref);
@@ -548,7 +555,7 @@ async function openDetail(id) {
 
   document.getElementById("d-ref").textContent = c.ref;
   document.getElementById("d-name").textContent = c.name;
-  document.getElementById("d-service").textContent = c.service;
+  document.getElementById("d-service").textContent = c.nrc;
   document.getElementById("d-category").textContent = c.category;
   document.getElementById("d-submitted").textContent = formatDate(c.submitted);
   document.getElementById("d-badge").textContent = c.status;

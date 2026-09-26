@@ -58,7 +58,7 @@ db.exec(`
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     reference      TEXT NOT NULL UNIQUE,
     customer_name  TEXT NOT NULL,
-    service_number TEXT NOT NULL,
+    nrc_number TEXT NOT NULL,
     phone          TEXT,
     email          TEXT,
     category       TEXT NOT NULL,
@@ -92,5 +92,25 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
   CREATE INDEX IF NOT EXISTS idx_notifications_unread ON notifications(user_id, is_read);
 `);
+
+// Migrate existing databases from service_number to nrc_number.
+const complaintColumns = db
+  .prepare("PRAGMA table_info(complaints)")
+  .all();
+
+const hasServiceNumber = complaintColumns.some(
+  (column) => column.name === "service_number",
+);
+
+const hasNrcNumber = complaintColumns.some(
+  (column) => column.name === "nrc_number",
+);
+
+if (hasServiceNumber && !hasNrcNumber) {
+  db.exec(`
+    ALTER TABLE complaints
+    RENAME COLUMN service_number TO nrc_number
+  `);
+}
 
 module.exports = db;

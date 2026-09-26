@@ -9,7 +9,7 @@ function serializeComplaint(row) {
     id: row.id,
     ref: row.reference,
     name: row.customer_name,
-    service: row.service_number,
+    nrc: row.nrc_number,
     phone: row.phone,
     email: row.email,
     category: row.category,
@@ -36,23 +36,36 @@ function attachLog(complaintId) {
 
 /** POST /api/complaints — public. Raise a new complaint. */
 function create(req, res) {
-  const { name, service, phone, email, category, description } = req.body;
+  const { name, nrc, phone, email, category, description } = req.body;
 
-  if (!name || !service || !category || !description) {
+  if (!name || !nrc || !category || !description) {
     return res
       .status(400)
       .json({
-        error: "Name, service number, category and description are required.",
+        error: "Name, NRC number, category and description are required.",
       });
   }
 
   const reference = generateReference();
   const now = new Date().toISOString();
 
+// NRC number is stored in the nrc_number column.
   const insertComplaint = db.prepare(`
-    INSERT INTO complaints (reference, customer_name, service_number, phone, email, category, description, status, submitted_at, updated_at)
+    INSERT INTO complaints (
+      reference,
+      customer_name,
+      nrc_number,
+      phone,
+      email,
+      category,
+      description,
+      status,
+      submitted_at,
+      updated_at
+    )
     VALUES (?, ?, ?, ?, ?, ?, ?, 'Open', ?, ?)
   `);
+
   const insertLog = db.prepare(`
     INSERT INTO complaint_logs (complaint_id, status, note, created_at)
     VALUES (?, 'Open', 'Complaint received via web portal.', ?)
@@ -62,7 +75,7 @@ function create(req, res) {
     const info = insertComplaint.run(
       reference,
       name,
-      service,
+      nrc,
       phone || null,
       email || null,
       category,
@@ -70,7 +83,9 @@ function create(req, res) {
       now,
       now,
     );
+
     insertLog.run(info.lastInsertRowid, now);
+
     return info.lastInsertRowid;
   });
 
@@ -104,7 +119,6 @@ function create(req, res) {
     complaint: serializeComplaint(row),
   });
 }
-
 /** GET /api/complaints/track/:reference — public. Track by reference number. */
 function trackByReference(req, res) {
   const row = db

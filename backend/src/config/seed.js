@@ -50,8 +50,32 @@ const complaintCount = db
 
 if (complaintCount === 0) {
   const insertComplaint = db.prepare(`
-    INSERT INTO complaints (reference, customer_name, service_number, phone, email, category, description, status, assigned_to, submitted_at, updated_at)
-    VALUES (@reference, @customer_name, @service_number, @phone, @email, @category, @description, @status, @assigned_to, @submitted_at, @updated_at)
+    INSERT INTO complaints (
+      reference,
+      customer_name,
+      nrc_number,
+      phone,
+      email,
+      category,
+      description,
+      status,
+      assigned_to,
+      submitted_at,
+      updated_at
+    )
+    VALUES (
+      @reference,
+      @customer_name,
+      @nrc_number,
+      @phone,
+      @email,
+      @category,
+      @description,
+      @status,
+      @assigned_to,
+      @submitted_at,
+      @updated_at
+    )
   `);
   const insertLog = db.prepare(`
     INSERT INTO complaint_logs (complaint_id, status, note, created_by, created_at)
@@ -62,7 +86,7 @@ if (complaintCount === 0) {
     {
       reference: "CCF-2026-1042",
       customer_name: "M. Chanda",
-      service_number: "MOD-88213",
+      nrc_number: "123456/78/1",
       phone: "0971234567",
       email: null,
       category: "Loan disbursement delay",
@@ -84,7 +108,7 @@ if (complaintCount === 0) {
     {
       reference: "CCF-2026-1041",
       customer_name: "P. Mwansa",
-      service_number: "CS-44210",
+      nrc_number: "234567/89/1",
       phone: "0966112233",
       email: "p.mwansa@example.com",
       category: "Incorrect deduction / repayment",
@@ -112,7 +136,7 @@ if (complaintCount === 0) {
     {
       reference: "CCF-2026-1039",
       customer_name: "R. Banda",
-      service_number: "MOD-71029",
+      nrc_number: "345678/90/1",
       phone: "0977889900",
       email: null,
       category: "Poor staff conduct",
@@ -140,7 +164,7 @@ if (complaintCount === 0) {
     {
       reference: "CCF-2026-1035",
       customer_name: "A. Phiri",
-      service_number: "CS-30982",
+      nrc_number: "456789/01/1",
       phone: null,
       email: "a.phiri@example.com",
       category: "Account / statement error",
@@ -173,7 +197,7 @@ if (complaintCount === 0) {
     {
       reference: "CCF-2026-1028",
       customer_name: "J. Musonda",
-      service_number: "MOD-55671",
+      nrc_number: "567890/12/1",
       phone: "0955443322",
       email: null,
       category: "Digital channel (app/USSD) issue",
