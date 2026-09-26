@@ -112,7 +112,7 @@ function initRaiseComplaintForm() {
   });
 }
 
-// for notifications on the staff dashboard
+// for notifications on the staff/assigner dashboard
 async function initNotifications() {
   const notificationList = document.getElementById("notifications-list");
 
@@ -370,93 +370,228 @@ function initLoginPage() {
 // My Assigned Cases page
 async function initMyAssignedCases() {
   const tbody = document.getElementById("assigned-cases-tbody");
+
   if (!tbody) return;
 
   const user = requireSession("staff");
+
   if (!user) return;
 
   document.querySelectorAll(".current-user-name").forEach((el) => {
-    el.textContent = `${user.name} — ${user.branch || "Staff"}`;
+    el.textContent = `${user.name} — Staff`;
   });
 
-  // const assignedSelect = document.getElementById("d-assigned");
-
-  // if (assignedSelect) {
-  //   try {
-  //     const { users } = await apiFetch("/complaints/assignees");
-
-  //     users.forEach((staff) => {
-  //       const option = document.createElement("option");
-  //       option.value = staff.id;
-  //       option.textContent = `${staff.name}${staff.branch ? ` — ${staff.branch}` : ""}`;
-  //       assignedSelect.appendChild(option);
-  //     });
-  //   } catch (err) {
-  //     console.error("Could not load staff accounts:", err);
-  //   }
-  // }
-
   async function renderAssignedCases() {
-    const status = document.getElementById("assigned-filter-status").value;
+    try {
+      const status = document.getElementById(
+        "assigned-filter-status",
+      ).value;
 
-    const { complaints } = await api.listComplaints({
-      status,
-      category: "all",
-      assignedTo: user.id,
-    });
+      const { complaints } = await api.listComplaints({
+        status,
+        category: "all",
+        assignedTo: user.id,
+      });
 
-    tbody.innerHTML = "";
+      tbody.innerHTML = "";
 
-    document.getElementById("assigned-result-count").textContent =
-      `${complaints.length} complaint${complaints.length === 1 ? "" : "s"}`;
+      document.getElementById("assigned-result-count").textContent =
+        `${complaints.length} complaint${
+          complaints.length === 1 ? "" : "s"
+        }`;
 
-    complaints.forEach((c) => {
-      const tr = document.createElement("tr");
+      complaints.forEach((c) => {
+        const tr = document.createElement("tr");
 
-      tr.innerHTML = `
-        <td class="cell-ref">${c.ref}</td>
-        <td>${c.name}</td>
-        <td>${c.category}</td>
-        <td>${formatDate(c.submitted)}</td>
-        <td>
-          <span class="badge ${statusBadgeClass(c.status)}">${c.status}</span>
-        </td>
-      `;
+        tr.innerHTML = `
+          <td class="cell-ref">${c.ref}</td>
+          <td>${c.name}</td>
+          <td>${c.category}</td>
+          <td>${formatDate(c.submitted)}</td>
+          <td>
+            <span class="badge ${statusBadgeClass(c.status)}">
+              ${c.status}
+            </span>
+          </td>
+        `;
 
-      tr.addEventListener("click", () => openDetail(c.id));
-      tbody.appendChild(tr);
-    });
+        tr.addEventListener("click", () => openAssignedCaseDetail(c.id));
 
-    document.getElementById("stat-open").textContent = complaints.filter(
-      (c) => c.status === "Open",
-    ).length;
+        tbody.appendChild(tr);
+      });
 
-    document.getElementById("stat-progress").textContent = complaints.filter(
-      (c) => c.status === "In Progress",
-    ).length;
+      document.getElementById("stat-open").textContent =
+        complaints.filter((c) => c.status === "Open").length;
 
-    document.getElementById("stat-resolved").textContent = complaints.filter(
-      (c) => c.status === "Resolved",
-    ).length;
+      document.getElementById("stat-progress").textContent =
+        complaints.filter((c) => c.status === "In Progress").length;
 
-    document.getElementById("stat-total").textContent = complaints.length;
+      document.getElementById("stat-resolved").textContent =
+        complaints.filter((c) => c.status === "Resolved").length;
+
+      document.getElementById("stat-total").textContent =
+        complaints.length;
+    } catch (error) {
+      console.error("Could not load assigned cases:", error);
+    }
+  }
+
+  async function openAssignedCaseDetail(id) {
+    try {
+      const { complaint: c } = await api.getComplaint(id);
+
+      document.getElementById("detail-empty").classList.add("hidden");
+
+      const panel = document.getElementById("detail-panel");
+      panel.classList.remove("hidden");
+
+      document.getElementById("d-ref").textContent = c.ref;
+
+      document.getElementById("d-name").textContent =
+        c.name;
+
+      document.getElementById("d-service").textContent =
+        c.nrc;
+
+      document.getElementById("d-phone").textContent =
+        c.phone || "Not provided";
+
+      document.getElementById("d-email").textContent =
+        c.email || "Not provided";
+
+      document.getElementById("d-category").textContent =
+        c.category;
+
+      document.getElementById("d-submitted").textContent =
+        formatDate(c.submitted);
+
+      document.getElementById("d-assigned").textContent =
+        c.assigned || "Unassigned";
+
+      document.getElementById("d-description").textContent =
+        c.description;
+
+      const badge = document.getElementById("d-badge");
+
+      badge.textContent = c.status;
+      badge.className =
+        "badge " + statusBadgeClass(c.status);
+
+      document.getElementById("d-status-select").value =
+        c.status;
+
+      document.getElementById("d-note").value = "";
+
+      const log = document.getElementById("d-log");
+
+      log.innerHTML = "";
+
+      if (!c.log || !c.log.length) {
+        log.innerHTML = `
+          <p style="font-size:0.86rem; color:var(--ink-soft);">
+            No case history available.
+          </p>
+        `;
+      } else {
+        c.log
+          .slice()
+          .reverse()
+          .forEach((entry) => {
+            const div = document.createElement("div");
+
+            div.className = "note-box";
+            div.style.marginBottom = "10px";
+
+            div.innerHTML = `
+              <div class="flex-between">
+                <strong style="font-size:0.82rem">
+                  ${entry.status}
+                </strong>
+
+                <span
+                  style="
+                    font-size:0.76rem;
+                    color:var(--ink-soft);
+                  "
+                >
+                  ${formatDate(entry.date)}
+                </span>
+              </div>
+
+              <p
+                style="
+                  margin:6px 0 0;
+                  font-size:0.84rem;
+                "
+              >
+                ${entry.note}
+              </p>
+            `;
+
+            log.appendChild(div);
+          });
+      }
+
+      const form = document.getElementById("detail-form");
+
+      form.onsubmit = async function (e) {
+        e.preventDefault();
+
+        const note = document
+          .getElementById("d-note")
+          .value
+          .trim();
+
+        if (!note) return;
+
+        const submitBtn = form.querySelector(
+          'button[type="submit"]',
+        );
+
+        submitBtn.disabled = true;
+
+        try {
+          await api.updateComplaint(id, {
+            status: document.getElementById(
+              "d-status-select",
+            ).value,
+            note,
+          });
+
+          document.getElementById("d-note").value = "";
+
+          await openAssignedCaseDetail(id);
+          await renderAssignedCases();
+        } catch (error) {
+          showFormError(form, error.message);
+        } finally {
+          submitBtn.disabled = false;
+        }
+      };
+    } catch (error) {
+      console.error(
+        "Could not load assigned complaint:",
+        error,
+      );
+    }
   }
 
   document
     .getElementById("assigned-filter-status")
     .addEventListener("change", () => renderAssignedCases());
 
-  await renderAssignedCases();
-
   const signOut = document.getElementById("sign-out");
 
   if (signOut) {
     signOut.addEventListener("click", (e) => {
       e.preventDefault();
+
       clearSession();
       window.location.href = "index.html";
     });
   }
+
+  await renderAssignedCases();
 }
 
 // Staff dashboard
@@ -469,23 +604,6 @@ async function initStaffDashboard() {
   document.querySelectorAll(".current-user-name").forEach((el) => {
     el.textContent = `${user.name} — ${user.branch || "Staff"}`;
   });
-
-  // const assignedSelect = document.getElementById("d-assigned");
-
-  // if (assignedSelect) {
-  //   try {
-  //     const { users } = await apiFetch("/complaints/assignees");
-
-  //     users.forEach((staff) => {
-  //       const option = document.createElement("option");
-  //       option.value = staff.id;
-  //       option.textContent = `${staff.name}${staff.branch ? ` — ${staff.branch}` : ""}`;
-  //       assignedSelect.appendChild(option);
-  //     });
-  //   } catch (err) {
-  //     console.error("Could not load staff accounts:", err);
-  //   }
-  // }
 
   const catFilter = document.getElementById("filter-category");
   CATEGORIES.forEach((c) => {
@@ -652,74 +770,6 @@ function initAdminDashboard() {
   }
 
   loadComplianceSummary();
-  // loadStaffTable();
-  // load compliance handles the threshold displau itself
-  // loadThresholdDisplay();
-
-  // const editThresholdsBtn = document.getElementById('edit-thresholds-btn');
-  // const thresholdsContainer = document.getElementById('thresholds-form');
-  // const thresholdsForm = document.getElementById('thresholds-form-element');
-  //   const cancelThresholdsBtn = document.getElementById('cancel-thresholds-btn');
-  //   const thresholdsError = document.getElementById('thresholds-error');
-
-  // if (editThresholdsBtn && thresholdsForm) {
-  //   editThresholdsBtn.addEventListener('click', async () => {
-  //     thresholdsError.innerHTML = '';
-
-  //     try {
-  //       const settings = await api.getSettings();
-
-  //       document.getElementById('acknowledge-days').value =
-  //         settings.acknowledgeDays;
-
-  //       document.getElementById('resolve-days').value =
-  //         settings.resolveDays;
-
-  //       thresholdsContainer.classList.remove('hidden');
-
-  //     } catch (err) {
-  //       thresholdsError.textContent = err.message;
-  //     }
-  //   });
-  // }
-
-  // if (cancelThresholdsBtn) {
-  //   cancelThresholdsBtn.addEventListener('click', () => {
-  //     thresholdsContainer.classList.add('hidden');
-  //     thresholdsError.innerHTML = '';
-  //   });
-  // }
-
-  // if (thresholdsForm) {
-  //   thresholdsForm.addEventListener('submit', async (e) => {
-  //     e.preventDefault();
-
-  //     thresholdsError.innerHTML = '';
-
-  //     const acknowledgeDays = Number(
-  //       document.getElementById('acknowledge-days').value
-  //     );
-
-  //     const resolveDays = Number(
-  //       document.getElementById('resolve-days').value
-  //     );
-
-  //     try {
-  //       await api.updateSettings({
-  //         acknowledgeDays,
-  //         resolveDays
-  //       });
-
-  //       thresholdsContainer.classList.add('hidden');
-
-  //       await loadComplianceSummary();
-  //       // await loadThresholdDisplay();
-
-  //     } catch (err) {
-  //       thresholdsError.textContent = err.message;
-  //     }
-  //   });
-  // }
 }
 
 async function loadComplianceSummary() {
@@ -752,33 +802,6 @@ async function loadComplianceSummary() {
   document.getElementById("resolve-days-display").textContent =
     data.thresholds.resolveDays;
 }
-
-// async function loadStaffTable() {
-//   const tbody = document.getElementById('staff-tbody');
-//   if (!tbody) return;
-//   const { users } = await api.listUsers();
-//   tbody.innerHTML = '';
-//   users.forEach(u => {
-//     const tr = document.createElement('tr');
-//     tr.innerHTML = `
-//       <td>${u.name}</td>
-//       <td style="text-transform:capitalize">${u.role}</td>
-//       <td>${u.branch || '—'}</td>
-//       <td><span class="badge ${u.status === 'active' ? 'badge-resolved' : 'badge-closed'}">${u.status === 'active' ? 'Active' : 'Suspended'}</span></td>
-//       <td><a href="#" data-id="${u.id}" data-status="${u.status}" class="toggle-status" style="font-size:0.82rem;">${u.status === 'active' ? 'Suspend' : 'Reactivate'}</a></td>`;
-//     tbody.appendChild(tr);
-//   });
-
-//   tbody.querySelectorAll('.toggle-status').forEach(link => {
-//     link.addEventListener('click', async (e) => {
-//       e.preventDefault();
-//       const id = e.target.dataset.id;
-//       const newStatus = e.target.dataset.status === 'active' ? 'suspended' : 'active';
-//       await api.updateUser(id, { status: newStatus });
-//       loadStaffTable();
-//     });
-//   });
-// }
 
 // admin user accounts
 function initAdminUsers() {
@@ -996,6 +1019,7 @@ async function initReportsPage() {
   if (!totalEl) return;
 
   const user = getUser();
+
   if (
     !user ||
     !getToken() ||
@@ -1005,18 +1029,18 @@ async function initReportsPage() {
     return;
   }
 
-  // display the current user's name and role in the header
+  // Display the current user's name and role in the header
   document.querySelectorAll(".current-user-name").forEach((el) => {
-  let roleLabel = "Staff";
+    let roleLabel = "Staff";
 
-  if (user.role === "admin") {
-    roleLabel = "Administrator";
-  } else if (user.role === "assigner") {
-    roleLabel = "Assigner / Monitor";
-  }
+    if (user.role === "admin") {
+      roleLabel = "Administrator";
+    } else if (user.role === "assigner") {
+      roleLabel = "Assigner / Monitor";
+    }
 
-  el.textContent = `${user.name} — ${roleLabel}`;
-});
+    el.textContent = `${user.name} — ${roleLabel}`;
+  });
 
   const sidebar = document.getElementById("reports-sidebar");
 
@@ -1030,9 +1054,39 @@ async function initReportsPage() {
         <a href="admin-settings.html">System settings</a>
 
         <div class="section-label">Reports</div>
-        <a href="reports.html" class="active">Export compliance report</a>
+        <a href="reports.html" class="active">Reports</a>
       `;
-        } else {
+    } else if (user.role === "assigner") {
+      sidebar.innerHTML = `
+        <div class="section-label">Workspace</div>
+
+        <a href="assigner-dashboard.html">Complaint queue</a>
+
+        <a href="reports.html" class="active">Reports</a>
+
+        <a href="notifications.html" class="notification-sidebar-link">
+          <span>Notifications</span>
+          <span
+            id="sidebar-notification-count"
+            style="
+              font-size:0.72rem;
+              min-width:20px;
+              text-align:center;
+              padding:2px 6px;
+              border-radius:10px;
+              background:var(--ink);
+              color:white;
+            "
+          >
+            0
+          </span>
+        </a>
+
+        <div class="section-label">Account</div>
+
+        <a href="notification-settings.html">Notification settings</a>
+      `;
+    } else {
       sidebar.innerHTML = `
         <div class="section-label">Workspace</div>
 
@@ -1060,6 +1114,7 @@ async function initReportsPage() {
         <a href="reports.html" class="active">Reports</a>
 
         <div class="section-label">Account</div>
+
         <a href="notification-settings.html">Notification settings</a>
       `;
     }
@@ -1201,9 +1256,29 @@ async function initNotificationSettings() {
 
   if (!page) return;
 
-  const user = requireSession("staff");
+  const user = getUser();
 
-  if (!user) return;
+  if (
+    !user ||
+    !getToken() ||
+    !["staff", "assigner", "admin"].includes(user.role)
+  ) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  // Display the current user's name and role in the header
+  document.querySelectorAll(".current-user-name").forEach((el) => {
+    let roleLabel = "Staff";
+
+    if (user.role === "admin") {
+      roleLabel = "Administrator";
+    } else if (user.role === "assigner") {
+      roleLabel = "Assigner / Monitor";
+    }
+
+    el.textContent = `${user.name} — ${roleLabel}`;
+  });
 
   const newComplaints = document.getElementById("notify-new-complaints");
   const complaintAssignments = document.getElementById("notify-assigned");
@@ -1510,6 +1585,57 @@ async function initAssignerDashboard() {
 
       document.getElementById("assigner-detail-description").textContent =
         complaint.description;
+
+      const log = document.getElementById("assigner-detail-log");
+
+      log.innerHTML = "";
+
+      if (!complaint.log || !complaint.log.length) {
+        log.innerHTML = `
+          <p style="font-size:0.86rem; color:var(--ink-soft);">
+            No case history available.
+          </p>
+        `;
+      } else {
+        complaint.log
+          .slice()
+          .reverse()
+          .forEach((entry) => {
+            const div = document.createElement("div");
+
+            div.className = "note-box";
+            div.style.marginBottom = "10px";
+
+            div.innerHTML = `
+              <div class="flex-between">
+                <strong style="font-size:0.82rem">
+                  ${entry.status}
+                </strong>
+
+                <span
+                  style="
+                    font-size:0.76rem;
+                    color:var(--ink-soft);
+                  "
+                >
+                  ${formatDate(entry.date)}
+                </span>
+              </div>
+
+              <p
+                style="
+                  margin:6px 0 0;
+                  font-size:0.84rem;
+                "
+              >
+                ${entry.note}
+              </p>
+            `;
+
+            log.appendChild(div);
+          });
+      }
+
 
       staffSelect.value = complaint.assignedId || "";
 

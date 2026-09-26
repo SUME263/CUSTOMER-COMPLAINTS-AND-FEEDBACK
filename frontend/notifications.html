@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notifications | Complaints & Feedback Portal</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <header class="topbar">
+      <a href="index.html" class="brand">
+        <span class="mark">CS</span>
+
+        <span class="name">
+          Civil Service & Defence Force Finance
+          <small>Notifications</small>
+        </span>
+      </a>
+
+      <nav class="topnav">
+        <span
+          class="current-user-name"
+          style="color: #fff; font-size: 0.9rem"
+        ></span>
+
+        <a href="#" id="sign-out">Sign out</a>
+      </nav>
+    </header>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="notifications-sidebar">
+        <!-- Sidebar will be set according to the logged-in user's role -->
+      </aside>
+
+      <main class="main-pane">
+        <div>
+          <div class="eyebrow">Notifications</div>
+
+          <h2>Your notifications</h2>
+
+          <p
+            style="
+              font-size: 0.86rem;
+              margin-top: 8px;
+              color: var(--ink-soft);
+            "
+          >
+            Updates and alerts relating to complaints assigned to you and the
+            complaint handling process.
+          </p>
+        </div>
+
+        <div class="panel mt-32">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Recent notifications</div>
+
+              <div class="panel-subtitle">
+                <span id="notification-count">0 unread</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="notifications-list">
+            <p style="font-size: 0.86rem; color: var(--ink-soft)">
+              Loading notifications...
+            </p>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const user = getUser();
+
+        if (!user || !getToken()) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        const sidebar = document.getElementById("notifications-sidebar");
+
+        if (sidebar) {
+          if (user.role === "admin") {
+            sidebar.innerHTML = `
+              <div class="section-label">System</div>
+
+              <a href="admin-dashboard.html">Compliance overview</a>
+              <a href="admin-users.html">User accounts</a>
+              <a href="admin-settings.html">System settings</a>
+
+              <div class="section-label">Reports</div>
+
+              <a href="reports.html">Reports</a>
+
+              <div class="section-label">Account</div>
+
+              <a href="notifications.html" class="active">
+                Notifications
+              </a>
+            `;
+          } else if (user.role === "assigner") {
+            sidebar.innerHTML = `
+              <div class="section-label">Workspace</div>
+
+              <a href="assigner-dashboard.html">Complaint queue</a>
+
+              <a href="reports.html">Reports</a>
+
+              <a href="notifications.html" class="active notification-sidebar-link">
+                <span>Notifications</span>
+                <span
+                  id="sidebar-notification-count"
+                  style="
+                    font-size:0.72rem;
+                    min-width:20px;
+                    text-align:center;
+                    padding:2px 6px;
+                    border-radius:10px;
+                    background:var(--ink);
+                    color:white;
+                  "
+                >
+                  0
+                </span>
+              </a>
+
+              <div class="section-label">Account</div>
+
+              <a href="notification-settings.html">
+                Notification settings
+              </a>
+            `;
+          } else {
+            sidebar.innerHTML = `
+              <div class="section-label">Workspace</div>
+
+              <a href="staff-dashboard.html">
+                Complaints queue
+              </a>
+
+              <a href="my-assigned-cases.html">
+                My assigned cases
+              </a>
+
+              <a href="reports.html">
+                Reports
+              </a>
+
+              <a href="notifications.html" class="active notification-sidebar-link">
+                <span>Notifications</span>
+                <span
+                  id="sidebar-notification-count"
+                  style="
+                    font-size:0.72rem;
+                    min-width:20px;
+                    text-align:center;
+                    padding:2px 6px;
+                    border-radius:10px;
+                    background:var(--ink);
+                    color:white;
+                  "
+                >
+                  0
+                </span>
+              </a>
+
+              <div class="section-label">Account</div>
+
+              <a href="notification-settings.html">
+                Notification settings
+              </a>
+            `;
+          }
+        }
+
+        document.querySelectorAll(".current-user-name").forEach((el) => {
+          let roleLabel = "Staff";
+
+          if (user.role === "admin") {
+            roleLabel = "Administrator";
+          } else if (user.role === "assigner") {
+            roleLabel = "Assigner / Monitor";
+          }
+
+          el.textContent = `${user.name} — ${roleLabel}`;
+        });
+
+        const signOut = document.getElementById("sign-out");
+
+        if (signOut) {
+          signOut.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            clearSession();
+            window.location.href = "index.html";
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
