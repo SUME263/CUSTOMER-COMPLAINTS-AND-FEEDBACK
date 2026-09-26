@@ -556,6 +556,8 @@ async function openDetail(id) {
   document.getElementById("d-ref").textContent = c.ref;
   document.getElementById("d-name").textContent = c.name;
   document.getElementById("d-service").textContent = c.nrc;
+  document.getElementById("d-phone").textContent = c.phone || "Not provided";
+  document.getElementById("d-email").textContent = c.email || "Not provided";
   document.getElementById("d-category").textContent = c.category;
   document.getElementById("d-submitted").textContent = formatDate(c.submitted);
   document.getElementById("d-badge").textContent = c.status;
