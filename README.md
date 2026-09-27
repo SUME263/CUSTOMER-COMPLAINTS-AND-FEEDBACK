@@ -1,78 +1,386 @@
 # Customer Complaints and Feedback Handling System
 
-Full-stack prototype for the COMP1682 project: a web-based complaint and
-feedback system for a Zambian financial institution serving civil servants
-and defence force personnel.
+A full-stack prototype developed for the **COMP1682 Computing Project**. The system provides a structured web-based platform for customers to submit and track complaints, while authorised staff manage cases through assignment, status updates, case notes, notifications, and reporting.
 
-## Structure
+The prototype is designed around a financial institution serving civil servants and defence force personnel in Zambia.
 
+## Project Overview
+
+The Customer Complaints and Feedback Handling System supports the complete complaint-handling workflow:
+
+```text
+Customer submits complaint
+        ↓
+Complaint receives reference number
+        ↓
+Assigner / Monitor reviews complaint
+        ↓
+Complaint assigned to staff member
+        ↓
+Staff reviews and handles complaint
+        ↓
+Staff updates status and adds case notes
+        ↓
+Assigner monitors progress
+        ↓
+Complaint resolved / closed
+        ↓
+Customer can track complaint status and updates
 ```
-project/
-├── frontend/     Static HTML/CSS/JS — customer, staff and admin UI
-└── backend/      Node.js + Express API, SQLite database
+
+## Technology Stack
+
+### Frontend
+
+* HTML5
+* CSS3
+* JavaScript
+* Responsive web interface
+
+### Backend
+
+* Node.js
+* Express.js
+* SQLite
+* JWT authentication
+* Role-based access control
+
+### Database
+
+The system uses SQLite with key entities including:
+
+* Users
+* Complaints
+* Complaint logs
+* Notifications
+* Notification settings
+
+## System Roles
+
+The system currently supports three main roles.
+
+| Role                   | Main Responsibilities                                               |
+| ---------------------- | ------------------------------------------------------------------- |
+| **Customer**           | Submit complaints and track complaint progress                      |
+| **Staff**              | Handle assigned complaints, update statuses and add case notes      |
+| **Assigner / Monitor** | Monitor the complaint queue and assign/reassign complaints to staff |
+| **Administrator**      | Manage users, system settings, reports and administrative functions |
+
+## Implemented Features
+
+### Customer
+
+* Submit a complaint without creating an account
+* Provide:
+
+  * Full name
+  * NRC number
+  * Phone number
+  * Email address
+  * Complaint category
+  * Complaint description
+* Receive a unique complaint reference number
+* Track a complaint using its reference number
+* View complaint status and customer-facing updates
+
+### Staff
+
+* Secure staff login
+* View the complaint queue
+* Filter complaints
+* View assigned complaints through **My Assigned Cases**
+* View customer details:
+
+  * Name
+  * NRC number
+  * Phone
+  * Email
+* View complaint description
+* View assigned staff member
+* Update complaint status
+* Add customer-facing case notes
+* View complete case history
+* Receive assignment notifications
+* Mark notifications as read
+* Configure notification preferences
+
+Staff members cannot assign or reassign complaints.
+
+### Assigner / Monitor
+
+* Secure login
+* View the overall complaint queue
+* Filter complaints by:
+
+  * Status
+  * Category
+  * Assignment
+* View complete complaint details
+* View customer contact information
+* View complaint descriptions
+* View assigned staff member
+* View case history
+* Assign complaints to active staff members
+* Reassign complaints to another staff member
+* Monitor complaint progress
+* Receive system notifications
+* Configure notification preferences
+
+The Assigner / Monitor role does not update complaint statuses or post customer-facing case notes.
+
+### Administrator
+
+* Administrator authentication
+* Compliance overview
+* Complaint reporting
+* User account management
+* Activate and suspend staff accounts
+* System settings
+* Access to the complaint management workflow
+
+## Complaint Lifecycle
+
+Complaints follow the following status workflow:
+
+```text
+Open
+  ↓
+In Progress
+  ↓
+Resolved
+  ↓
+Closed
 ```
 
-## Running it
+Status changes are recorded in the complaint history.
 
-**1. Backend**
+Each complaint can contain multiple case-history entries recording actions and notes associated with the complaint.
 
-```bash
+## Assignment Workflow
+
+Assignment is separated from complaint handling.
+
+```text
+Assigner / Administrator
+          ↓
+Select complaint
+          ↓
+Select active staff member
+          ↓
+Assign / Reassign
+          ↓
+Staff receives notification
+          ↓
+Staff handles complaint
+```
+
+Staff members do not have permission to assign or reassign complaints.
+
+## Notifications
+
+The notification system currently supports:
+
+* Complaint assignment notifications
+* Unread notification count
+* Notification sidebar indicator
+* Notification listing
+* Mark notification as read
+* Role-based notification access
+* Notification preferences
+
+When an Assigner or Administrator assigns a complaint to a staff member, the assigned staff member receives an in-system notification.
+
+## Security and Access Control
+
+The backend uses JWT-based authentication and role-based authorisation.
+
+Access to protected functionality is controlled by role.
+
+Examples:
+
+* Staff cannot assign complaints.
+* Staff cannot access the staff-assignee list.
+* Assigner users cannot update complaint statuses.
+* Assigner users can assign and reassign complaints.
+* Administrator users have administrative privileges.
+
+Unauthorised API requests are rejected by the backend rather than relying only on frontend restrictions.
+
+## Project Structure
+
+```text
+CUSTOMER-COMPLAINTS-AND-FEEDBACK/
+│
+├── frontend/
+│   ├── *.html
+│   ├── css/
+│   └── js/
+│
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── routes/
+│   │   └── ...
+│   ├── package.json
+│   └── .env.example
+│
+└── README.md
+```
+
+## Running the Project
+
+### 1. Start the Backend
+
+Open a terminal in the project directory:
+
+```powershell
 cd backend
+```
+
+Install dependencies:
+
+```powershell
 npm install
+```
+
+Create the environment file from the example:
+
+```powershell
 cp .env.example .env
-npm run seed      # creates the database + demo accounts
-npm start          # http://localhost:4000
 ```
 
-Demo accounts (created by `npm run seed`):
+Seed the database:
 
-| Role  | Email             | Password  |
-| ----- | ----------------- | --------- |
-| Staff | b.tembo@ccf.local | Staff123! |
-| Admin | s.mwape@ccf.local | Admin123! |
+```powershell
+npm run seed
+```
 
-**2. Frontend**
+Start the backend:
 
-The frontend is static files — serve them with any static server. Easiest
-options:
+```powershell
+npm start
+```
 
-```bash
+The API runs on:
+
+```text
+http://localhost:4000
+```
+
+### 2. Start the Frontend
+
+Open another terminal:
+
+```powershell
 cd frontend
-npx serve .        # or: python3 -m http.server 5500
 ```
 
-Then open the printed URL. `frontend/js/api.js` points at
-`http://localhost:4000/api` — change `API_BASE` there if the backend runs
-somewhere else.
+Serve the frontend using a static server:
 
-## What's implemented
+```powershell
+npx serve .
+```
 
-- **Customer**: raise a complaint (`raise-complaint.html`), track by
-  reference number (`track-complaint.html`) — no account needed
-- **Staff**: sign in, view/filter the complaint queue, review a complaint,
-  update its status with a note (`staff-dashboard.html`)
-- **Admin**: sign in, compliance summary (resolution rate, category
-  breakdown, overdue-acknowledgement flag), staff account
-  activation/suspension (`admin-dashboard.html`)
-- **API**: JWT authentication, role-based access control (staff/admin),
-  full complaint lifecycle with an audit trail (`complaint_logs` table)
+Alternatively:
 
-## Maps to the proposal
+```powershell
+python -m http.server 5500
+```
 
-- Database: `backend/src/config/db.js` — `users`, `complaints`,
-  `complaint_logs` tables, matching the ERD entities in the proposal
-  (customer profiles, complaint records, staff roles, status tracking,
-  audit logs)
-- Complaint lifecycle: Open → In Progress → Resolved → Closed, enforced
-  by a `CHECK` constraint and shown as the stepper on the tracking page
-- Compliance thresholds (`ACKNOWLEDGE_DAYS`, `RESOLVE_DAYS` in `.env`)
-  reflect the Bank of Zambia directive referenced in the proposal; the
-  admin reports endpoint flags complaints still Open past the
-  acknowledgement window
+Open the URL provided by the static server.
 
-## Not yet built
+The frontend API configuration is located in:
 
-- Objective 6 testing (unit/integration/UAT test suite)
-- Email/SMS notifications on status change
-- File attachments for complaints (form field exists, not wired up)
-- Deployment configuration (currently local-only, SQLite)
+```text
+frontend/js/api.js
+```
+
+The API base URL should point to the backend:
+
+```text
+http://localhost:4000/api
+```
+
+## Demo Accounts
+
+The seed data creates demonstration accounts for testing the different roles.
+
+| Role               | Example Account |
+| ------------------ | --------------- |
+| Staff              | B. Tembo        |
+| Staff              | C. Zulu         |
+| Assigner / Monitor | A. Phiri        |
+| Administrator      | S. Mwape        |
+
+Passwords are defined in the project's seed data and should not be committed as production credentials.
+
+## Testing Completed
+
+The following workflows have been tested during development:
+
+* Customer complaint submission
+* NRC-based customer identification
+* Complaint tracking
+* Staff login
+* Staff complaint queue
+* My Assigned Cases
+* Customer contact information display
+* Staff status updates
+* Staff case notes
+* Case history
+* Assigner complaint monitoring
+* Complaint assignment
+* Complaint reassignment
+* Assignment notifications
+* Unread notification count
+* Marking notifications as read
+* Role-based access restrictions
+* Administrator functions
+
+## Current Development Status
+
+### Completed
+
+* Customer complaint submission
+* NRC identification
+* Complaint tracking
+* Staff complaint management
+* My Assigned Cases
+* Assigner / Monitor role
+* Complaint assignment and reassignment
+* Case history
+* In-system notifications
+* Notification settings
+* Role-based access control
+* Administrative user management
+* Reports and compliance overview
+* Core end-to-end workflow testing
+
+### Remaining Development Work
+
+The following areas remain part of the development process:
+
+* UI and layout refinement
+* Mobile responsiveness review
+* Cross-page visual consistency
+* Code cleanup and documentation
+* Additional testing and user acceptance testing
+* Final project documentation and evaluation
+
+## Academic Context
+
+This project was developed as part of the **COMP1682 Computing Project**.
+
+The system demonstrates the application of:
+
+* Full-stack web development
+* Database design
+* REST API development
+* Authentication and authorisation
+* Role-based access control
+* Complaint lifecycle management
+* Notification systems
+* User interface design
+* Software testing
