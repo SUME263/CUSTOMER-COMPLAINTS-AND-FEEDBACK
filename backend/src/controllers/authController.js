@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 
-/** POST /api/auth/login — staff and admin only; customers don't have accounts. */
+// Verifies email and password, checks account status, and returns a JWT for the session.
 function login(req, res) {
   const { email, password } = req.body;
   if (!email || !password) {

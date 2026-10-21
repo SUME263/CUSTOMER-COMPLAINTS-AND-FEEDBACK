@@ -8,7 +8,6 @@ The prototype is designed around a financial institution serving civil servants 
 
 The Customer Complaints and Feedback Handling System supports the complete complaint-handling workflow:
 
-```text
 Customer submits complaint
         ↓
 Complaint receives reference number

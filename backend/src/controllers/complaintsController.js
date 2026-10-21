@@ -34,7 +34,7 @@ function attachLog(complaintId) {
     .all(complaintId);
 }
 
-/** POST /api/complaints — public. Raise a new complaint. */
+//POST /api/complaints — public. Raise a new complaint 
 function create(req, res) {
   const { name, nrc, phone, email, category, description } = req.body;
 
@@ -220,22 +220,6 @@ function update(req, res) {
   const newStatus = status || existing.status;
   const now = new Date().toISOString();
 
-  // to know who was assigned a complaint
-  // let assignmentName = null;
-
-  // if (assignedTo) {
-  //   const assignedUser = db
-  //     .prepare("SELECT name FROM users WHERE id = ? AND role = ?")
-  //     .get(assignedTo, "staff");
-
-  //   if (!assignedUser) {
-  //     return res
-  //       .status(400)
-  //       .json({ error: "Selected staff member was not found." });
-  //   }
-
-  //   assignmentName = assignedUser.name;
-  // }
 
   const run = db.transaction(() => {
     db.prepare(
@@ -245,10 +229,6 @@ function update(req, res) {
     ).run(newStatus, now, existing.id);
 
     let logNote = note.trim();
-
-    // if (assignedTo && Number(assignedTo) !== Number(existing.assigned_to)) {
-    //   logNote = `Assigned to ${assignmentName}. ${logNote}`;
-    // }
 
     if (newStatus && newStatus !== existing.status && existing.assigned_to) {
       createNotification({
@@ -260,17 +240,6 @@ function update(req, res) {
         settingKey: "statusUpdates",
       });
     }
-
-    // if (assignedTo && Number(assignedTo) !== Number(existing.assigned_to)) {
-    //   createNotification({
-    //     userId: Number(assignedTo),
-    //     complaintId: existing.id,
-    //     type: "assignment",
-    //     title: "Complaint assigned to you",
-    //     message: `${existing.reference} has been assigned to you for review.`,
-    //     settingKey: "complaintAssignments",
-    //   });
-    // }
 
     db.prepare(
       `INSERT INTO complaint_logs
@@ -291,7 +260,7 @@ function update(req, res) {
   res.json({ complaint });
 }
 
-// for assignee 
+// Assigns a complaint to an active staff member, records it in the case history, and sends a notification.
 function assign(req, res) {
   const { assignedTo } = req.body;
 
