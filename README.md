@@ -1,11 +1,9 @@
 # Customer Complaints and Feedback Handling System
-
 A full-stack prototype developed for the **COMP1682 Computing Project**. The system provides a structured web-based platform for customers to submit and track complaints, while authorised staff manage cases through assignment, status updates, case notes, notifications, and reporting.
 
 The prototype is designed around a financial institution serving civil servants and defence force personnel in Zambia.
 
 ## Project Overview
-
 The Customer Complaints and Feedback Handling System supports the complete complaint-handling workflow:
 
 Customer submits complaint

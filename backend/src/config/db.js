@@ -1,13 +1,4 @@
-/**
- * Database connection + schema.
- *
- * Uses SQLite (better-sqlite3) so the project runs with zero external
- * services during development and marking. The schema below is plain
- * SQL and maps directly onto the ERD in the project proposal — swapping
- * to MySQL/PostgreSQL later means changing this file only (and the
- * AUTOINCREMENT / PRAGMA lines), not the routes or controllers.
- */
-
+// database connection and schema 
 const path = require("path");
 const fs = require("fs");
 const Database = require("better-sqlite3");
