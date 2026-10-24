@@ -1,5 +1,6 @@
 const db = require("../config/db");
 
+// get all notifications for the signed in user with newest first 
 function list(req, res) {
   const notifications = db
     .prepare(
@@ -22,6 +23,7 @@ function list(req, res) {
     )
     .all(req.user.id);
 
+  // format the notifications before returning them to the frontend
   res.json(
     notifications.map((notification) => ({
       id: notification.id,
@@ -36,6 +38,7 @@ function list(req, res) {
   );
 }
 
+// count unread notifications for the signed in user 
 function unreadCount(req, res) {
   const result = db
     .prepare(
@@ -53,6 +56,7 @@ function unreadCount(req, res) {
   });
 }
 
+// mark notifiction as read 
 function markAsRead(req, res) {
   const notificationId = Number(req.params.id);
 

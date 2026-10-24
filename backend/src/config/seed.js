@@ -1,13 +1,8 @@
-/**
- * Seeds demo accounts and sample complaints so the frontend has
- * something to show immediately after `npm run seed`.
- * Safe to re-run: skips anything that already exists.
- */
-
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const db = require("./db");
 
+//create a user if the email does not exist 
 function upsertUser({ name, email, password, role, branch }) {
   const existing = db
     .prepare("SELECT id FROM users WHERE email = ?")
@@ -22,6 +17,7 @@ function upsertUser({ name, email, password, role, branch }) {
   return info.lastInsertRowid;
 }
 
+//demo accounts for testing
 const tembo = upsertUser({
   name: "B. Tembo",
   email: "b.tembo@ccf.local",
@@ -54,6 +50,7 @@ upsertUser({
   branch: "Lusaka HQ",
 });
 
+//sample complaints only if the database is empty
 const complaintCount = db
   .prepare("SELECT COUNT(*) AS n FROM complaints")
   .get().n;
@@ -246,6 +243,7 @@ if (complaintCount === 0) {
     },
   ];
 
+  //save the complaints and their history together
   const insertAll = db.transaction((rows) => {
     for (const row of rows) {
       const info = insertComplaint.run(row);
@@ -264,6 +262,9 @@ if (complaintCount === 0) {
   insertAll(seedRows);
 }
 
+//output in the terminal to see if accounts were created successfully
 console.log("Seed complete.");
-console.log("Staff login:  b.tembo@ccf.local / Staff123!");
-console.log("Admin login:  s.mwape@ccf.local / Admin123!");
+console.log("Staff login:    b.tembo@ccf.local / Staff123!");
+console.log("Staff login:    c.zulu@ccf.local / Staff123!");
+console.log("Admin login:    s.mwape@ccf.local / Admin123!");
+console.log("Assigner login: a.phiri@ccf.local / Assigner123!");

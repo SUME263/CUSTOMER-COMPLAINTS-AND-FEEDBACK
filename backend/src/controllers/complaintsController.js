@@ -4,6 +4,7 @@ const { generateReference } = require("../utils/reference");
 
 const VALID_STATUSES = ["Open", "In Progress", "Resolved", "Closed"];
 
+// Format a complaint from frontend
 function serializeComplaint(row) {
   return {
     id: row.id,
@@ -22,6 +23,7 @@ function serializeComplaint(row) {
   };
 }
 
+// get history of a complaint including who made each update
 function attachLog(complaintId) {
   return db
     .prepare(
@@ -34,7 +36,7 @@ function attachLog(complaintId) {
     .all(complaintId);
 }
 
-//POST /api/complaints — public. Raise a new complaint 
+// create a new complaint submitted through the submission form
 function create(req, res) {
   const { name, nrc, phone, email, category, description } = req.body;
 
@@ -49,7 +51,7 @@ function create(req, res) {
   const reference = generateReference();
   const now = new Date().toISOString();
 
-// NRC number is stored in the nrc_number column.
+// nrc number is stored in the nrc number column.
   const insertComplaint = db.prepare(`
     INSERT INTO complaints (
       reference,
@@ -71,6 +73,7 @@ function create(req, res) {
     VALUES (?, 'Open', 'Complaint received via web portal.', ?)
   `);
 
+  // save complaint and its initial history entry together
   const run = db.transaction(() => {
     const info = insertComplaint.run(
       reference,
@@ -93,6 +96,7 @@ function create(req, res) {
 
   const row = db.prepare("SELECT * FROM complaints WHERE id = ?").get(id);
 
+  // notify all active staff members of the new complaint
   const activeStaff = db
     .prepare(
       `
@@ -119,7 +123,8 @@ function create(req, res) {
     complaint: serializeComplaint(row),
   });
 }
-/** GET /api/complaints/track/:reference — public. Track by reference number. */
+
+// find a complaint using its reference number for public tracking
 function trackByReference(req, res) {
   const row = db
     .prepare("SELECT * FROM complaints WHERE reference = ?")
@@ -134,7 +139,7 @@ function trackByReference(req, res) {
   res.json({ complaint });
 }
 
-/** GET /api/complaints — staff/admin. List with optional filters. */
+// list complaints with optional filters for status, category and assigned staff
 function list(req, res) {
   const { status, category, assignedTo } = req.query;
   let sql = `
@@ -145,6 +150,7 @@ function list(req, res) {
   `;
   const params = [];
 
+  //add filters only when a specific value has been selected
   if (status && status !== "all") {
     sql += " AND c.status = ?";
     params.push(status);
@@ -160,13 +166,14 @@ function list(req, res) {
     params.push(Number(assignedTo));
   }
 
+  //show newest complaints first
   sql += " ORDER BY c.submitted_at DESC";
 
   const rows = db.prepare(sql).all(...params);
   res.json({ complaints: rows.map(serializeComplaint) });
 }
 
-/** GET /api/complaints/:id — staff/admin. Full detail including log. */
+// get one complaint with its full history
 function getById(req, res) {
   const row = db
     .prepare(
@@ -182,7 +189,7 @@ function getById(req, res) {
   res.json({ complaint });
 }
 
-/** GET /api/complaints/assignees — staff/admin. List active staff accounts. */
+// list active staff accounts
 function listAssignees(req, res) {
   const rows = db
     .prepare(
@@ -199,7 +206,7 @@ function listAssignees(req, res) {
   res.json({ users: rows });
 }
 
-/** PATCH /api/complaints/:id — staff/admin. Update status/assignment, append a log entry. */
+// update the status or assignment of a complaint and change its history 
 function update(req, res) {
   const { status, note } = req.body;
   const existing = db
@@ -220,7 +227,7 @@ function update(req, res) {
   const newStatus = status || existing.status;
   const now = new Date().toISOString();
 
-
+ // save status change and its history entry together
   const run = db.transaction(() => {
     db.prepare(
       `UPDATE complaints
@@ -230,6 +237,7 @@ function update(req, res) {
 
     let logNote = note.trim();
 
+    // notify assigned staff member when the status changes 
     if (newStatus && newStatus !== existing.status && existing.assigned_to) {
       createNotification({
         userId: Number(existing.assigned_to),
@@ -241,6 +249,7 @@ function update(req, res) {
       });
     }
 
+    // record update and the user who made it 
     db.prepare(
       `INSERT INTO complaint_logs
       (complaint_id, status, note, created_by, created_at)
@@ -250,6 +259,7 @@ function update(req, res) {
 
   run();
 
+  // return the updated complaint with its full history
   const row = db
     .prepare(
       `SELECT c.*, u.name AS assigned_name FROM complaints c LEFT JOIN users u ON u.id = c.assigned_to WHERE c.id = ?`,
@@ -260,7 +270,7 @@ function update(req, res) {
   res.json({ complaint });
 }
 
-// Assigns a complaint to an active staff member, records it in the case history, and sends a notification.
+// assign a complaint to an active staff member records it in the case history, and sends a notification.
 function assign(req, res) {
   const { assignedTo } = req.body;
 
@@ -298,6 +308,7 @@ function assign(req, res) {
 
   const now = new Date().toISOString();
 
+  // update the assignment and record it in the complaint history 
   const run = db.transaction(() => {
     db.prepare(
       `
@@ -323,6 +334,7 @@ function assign(req, res) {
       now,
     );
 
+    // notify staff member that complaint has been assigned to them
     createNotification({
       userId: Number(assignedTo),
       complaintId: existing.id,
@@ -335,6 +347,7 @@ function assign(req, res) {
 
   run();
 
+  // fetch updated complaint including the assigned staff member's name
   const row = db
     .prepare(
       `

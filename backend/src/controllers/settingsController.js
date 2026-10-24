@@ -17,9 +17,7 @@ function getSetting(key) {
   return DEFAULT_SETTINGS[key];
 }
 
-/**
- * GET /api/settings — admin only.
- */
+// return current complaint deadline settings 
 function getSettings(req, res) {
   res.json({
     acknowledgeDays: getSetting("acknowledge_days"),
@@ -27,9 +25,7 @@ function getSettings(req, res) {
   });
 }
 
-/**
- * PATCH /api/settings — admin only.
- */
+// validate and update complaint deadline settings 
 function updateSettings(req, res) {
   const { acknowledgeDays, resolveDays } = req.body;
 
@@ -57,6 +53,7 @@ function updateSettings(req, res) {
     });
   }
 
+  // insert new settings or update existing ones
   const upsert = db.prepare(`
     INSERT INTO system_settings (setting_key, setting_value, updated_at)
     VALUES (?, ?, datetime('now'))
@@ -78,6 +75,7 @@ function updateSettings(req, res) {
 
   update();
 
+  // return confirmation along with the latest saved settings
   res.json({
     message: "Settings updated successfully.",
     acknowledgeDays: getSetting("acknowledge_days"),

@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 const { addWorkingDays } = require("../utils/workingDays");
 
-/** GET /api/reports/summary — staff/admin. Feeds the admin compliance dashboard. */
+// generate summary stats for admin dashboard 
 function summary(req, res) {
   const total = db.prepare("SELECT COUNT(*) AS n FROM complaints").get().n;
 
@@ -32,6 +32,7 @@ function summary(req, res) {
     return row ? Number(row.setting_value) : fallback;
   };
 
+  // load allowed working days for acknowledgement and resolving complaints 
   const ackDays = getSetting("acknowledge_days", 2);
   const resolveDays = getSetting("resolve_days", 14);
 
@@ -59,6 +60,7 @@ function summary(req, res) {
     )
     .all();
 
+  // find overdue complaints 
   const overdueResolution = resolutionComplaints.filter((complaint) => {
     const deadline = addWorkingDays(
       new Date(complaint.submitted_at),
@@ -68,6 +70,8 @@ function summary(req, res) {
     return now > deadline;
   });
 
+
+  // return summary stats, deadlines and overdue complaints 
   res.json({
     total,
     open,

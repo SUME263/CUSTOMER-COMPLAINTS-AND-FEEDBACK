@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-// Requires a valid JWT. Attaches { id, role, name } to req.user.
+// check that the user has a valid JWT before accessing protected routes 
 function requireAuth(req, res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
@@ -19,7 +19,7 @@ function requireAuth(req, res, next) {
   }
 }
 
-// Restricts a route to one or more roles. Use after requireAuth.
+// Allow access only to users with one of the specificied roles 
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {

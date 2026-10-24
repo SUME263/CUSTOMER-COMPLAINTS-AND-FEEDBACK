@@ -3,11 +3,11 @@ const controller = require("../controllers/complaintsController");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const router = express.Router();
 
-// Public — customer-facing
+// allow customers to submit complaints and track them using a reference 
 router.post("/", controller.create);
 router.get("/track/:reference", controller.trackByReference);
 
-// Internal complaint queue — staff, assigner and admin
+// allow staff to view complaint queue 
 router.get(
   "/",
   requireAuth,
@@ -15,7 +15,7 @@ router.get(
   controller.list,
 );
 
-// Staff list is only needed by the assigner/admin for delegation
+// allow assigners and admins to view active staff members for delegation
 router.get(
   "/assignees",
   requireAuth,
@@ -23,7 +23,7 @@ router.get(
   controller.listAssignees,
 );
 
-// Complaint details — staff, assigner and admin
+// allow staff to view their own complaints and admins to view all complaints
 router.get(
   "/:id",
   requireAuth,
@@ -31,7 +31,7 @@ router.get(
   controller.getById,
 );
 
-// Assignment/delegation — assigner and admin only
+// allow assigners and admins to assign complaints to staff members
 router.patch(
   "/:id/assignment",
   requireAuth,
@@ -39,7 +39,7 @@ router.patch(
   controller.assign,
 );
 
-// Complaint handling — staff and admin
+// allow staff and admins to update complaint status and notes 
 router.patch(
   "/:id",
   requireAuth,

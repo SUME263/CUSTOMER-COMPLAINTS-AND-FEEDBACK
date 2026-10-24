@@ -6,6 +6,7 @@ const Database = require("better-sqlite3");
 const DB_PATH =
   process.env.DB_PATH || path.join(__dirname, "..", "..", "data", "ccf.db");
 
+// create the folder for the database if it does not already exist
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 const db = new Database(DB_PATH);
@@ -85,7 +86,7 @@ db.exec(`
 `);
 
 // might not need these two when creating a new file
-// Migrate existing databases from service_number to nrc_number.
+// migrate existing databases from service number to nrc number.
 const complaintColumns = db
   .prepare("PRAGMA table_info(complaints)")
   .all();
@@ -105,64 +106,6 @@ if (hasServiceNumber && !hasNrcNumber) {
   `);
 }
 
-// // Migrate existing databases to support the assigner role.
-// // Migrate existing databases to support the assigner role.
-// const userTableSql = db
-//   .prepare(
-//     "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'users'",
-//   )
-//   .get();
-
-// if (
-//   userTableSql &&
-//   userTableSql.sql &&
-//   userTableSql.sql.includes("role IN ('staff', 'admin')")
-// ) {
-//   db.pragma("foreign_keys = OFF");
-
-//   db.exec(`
-//     ALTER TABLE users RENAME TO users_old;
-
-//     CREATE TABLE users (
-//       id             INTEGER PRIMARY KEY AUTOINCREMENT,
-//       name           TEXT NOT NULL,
-//       email          TEXT NOT NULL UNIQUE,
-//       password_hash  TEXT NOT NULL,
-//       role           TEXT NOT NULL
-//                      CHECK (role IN ('staff', 'assigner', 'admin')),
-//       branch         TEXT,
-//       status         TEXT NOT NULL DEFAULT 'active'
-//                      CHECK (status IN ('active', 'suspended')),
-//       created_at     TEXT NOT NULL DEFAULT (datetime('now'))
-//     );
-
-//     INSERT INTO users (
-//       id,
-//       name,
-//       email,
-//       password_hash,
-//       role,
-//       branch,
-//       status,
-//       created_at
-//     )
-//     SELECT
-//       id,
-//       name,
-//       email,
-//       password_hash,
-//       role,
-//       branch,
-//       status,
-//       created_at
-//     FROM users_old;
-
-//     DROP TABLE users_old;
-//   `);
-
-//   db.pragma("foreign_keys = ON");
-// }
-
 // Migrate existing databases to support the assigner role
 // and repair foreign-key references created during the users migration.
 const userTableSql = db
@@ -179,7 +122,7 @@ if (
   db.pragma("foreign_keys = OFF");
 
   const migrateUsers = db.transaction(() => {
-    // Preserve existing data by temporarily renaming all tables
+    // preserve existing data by temporarily renaming all tables
     // that contain foreign keys to users.
     db.exec(`
       ALTER TABLE notification_settings RENAME TO notification_settings_old;

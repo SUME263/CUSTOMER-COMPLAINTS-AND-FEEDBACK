@@ -1,5 +1,6 @@
 const db = require("../config/db");
 
+// default notification settings
 const DEFAULT_SETTINGS = {
   newComplaints: true,
   complaintAssignments: true,
@@ -7,6 +8,7 @@ const DEFAULT_SETTINGS = {
   deadlineReminders: true,
 };
 
+// get notification preferences for the signed in user 
 function getSettings(req, res) {
   const userId = req.user.id;
 
@@ -36,6 +38,7 @@ function getSettings(req, res) {
   });
 }
 
+// validate and save the user's notification preferences 
 function updateSettings(req, res) {
   const userId = req.user.id;
 
@@ -61,6 +64,7 @@ function updateSettings(req, res) {
     }
   }
 
+  // insert new settings or update existing preferences for signed in user 
   db.prepare(
     `
     INSERT INTO notification_settings (
@@ -88,6 +92,7 @@ function updateSettings(req, res) {
     deadlineReminders ? 1 : 0,
   );
 
+  // confirm settings have been saved
   res.json({
     message: "Notification settings saved successfully.",
     newComplaints,
