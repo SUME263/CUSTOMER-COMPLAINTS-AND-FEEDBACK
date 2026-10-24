@@ -4,6 +4,7 @@ const { addWorkingDays } = require("./workingDays");
 
 const { createNotification } = require("./notificationService");
 
+// get a system setting or use its default value
 function getSetting(key, fallback) {
   const row = db
     .prepare("SELECT setting_value FROM system_settings WHERE setting_key = ?")
@@ -12,6 +13,7 @@ function getSetting(key, fallback) {
   return row ? Number(row.setting_value) : fallback;
 }
 
+// check whether a reminder has already been sent for a complaint
 function hasReminderBeenSent(complaintId, type) {
   const row = db
     .prepare(
@@ -28,6 +30,7 @@ function hasReminderBeenSent(complaintId, type) {
   return Boolean(row);
 }
 
+// check active complaints and send reminders as deadlines approach
 function checkDeadlineNotifications() {
   const ackDays = getSetting("acknowledge_days", 2);
   const resolveDays = getSetting("resolve_days", 14);
@@ -50,6 +53,7 @@ function checkDeadlineNotifications() {
   const now = new Date();
 
   complaints.forEach((complaint) => {
+    // calculate the acknowledgement and resolution deadlines
     const acknowledgementDeadline = addWorkingDays(
       new Date(complaint.submitted_at),
       ackDays,
@@ -60,6 +64,7 @@ function checkDeadlineNotifications() {
       resolveDays,
     );
 
+    // set reminder dates one working day before each deadline
     const acknowledgementReminderDate = addWorkingDays(
       acknowledgementDeadline,
       -1,
@@ -67,6 +72,7 @@ function checkDeadlineNotifications() {
 
     const resolutionReminderDate = addWorkingDays(resolutionDeadline, -1);
 
+    // send an acknowledgement reminder if the complaint is still open
     if (
       complaint.status === "Open" &&
       now >= acknowledgementReminderDate &&
@@ -80,6 +86,7 @@ function checkDeadlineNotifications() {
       );
     }
 
+    // send a resolution reminder if one has not already been sent
     if (
       now >= resolutionReminderDate &&
       !hasReminderBeenSent(complaint.id, "resolution_reminder")
@@ -94,6 +101,7 @@ function checkDeadlineNotifications() {
   });
 }
 
+// send a reminder to the assigned staff member or all active staff if unassigned
 function sendReminder(complaint, type, title, message) {
   if (complaint.assigned_to) {
     createNotification({
@@ -108,6 +116,7 @@ function sendReminder(complaint, type, title, message) {
     return;
   }
 
+  // notify all active staff when no one is assigned to the complaint
   const activeStaff = db
     .prepare(
       `

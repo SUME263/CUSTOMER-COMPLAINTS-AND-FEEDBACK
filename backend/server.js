@@ -16,11 +16,14 @@ const notificationsRoutes = require("./src/routes/notificationsRoutes");
 
 const app = express();
 
+// allow requests from the configured frontend origin 
 app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
 app.use(express.json());
 
+// endpoint to check if api is running
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
+// connect each api path to its corresponding route 
 app.use("/api/auth", authRoutes);
 app.use("/api/complaints", complaintsRoutes);
 app.use("/api/users", usersRoutes);
@@ -32,7 +35,7 @@ app.use("/api/notifications", notificationsRoutes);
 // 404 for unmatched API routes
 app.use("/api", (req, res) => res.status(404).json({ error: "Not found." }));
 
-// Centralised error handler
+// centralised error handler
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: "Something went wrong on our side." });

@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-// The service checks the user's saved preferences before creating a notification.
+// get the user's saved notification preferences before creating a notification
 function getUserNotificationSettings(userId) {
   const row = db
     .prepare(
@@ -16,6 +16,7 @@ function getUserNotificationSettings(userId) {
     )
     .get(userId);
 
+  // enable all notification types by default if no settings are saved
   if (!row) {
     return {
       newComplaints: true,
@@ -25,6 +26,7 @@ function getUserNotificationSettings(userId) {
     };
   }
 
+  // convert the database values into boolean values for use in the application
   return {
     newComplaints: Boolean(row.new_complaints),
     complaintAssignments: Boolean(row.complaint_assignments),
@@ -41,12 +43,15 @@ function createNotification({
   message,
   settingKey,
 }) {
+  // check the user's notification preferences before saving the notification
   const settings = getUserNotificationSettings(userId);
 
+  // skip the notification if the related setting is disabled
   if (settingKey && !settings[settingKey]) {
     return false;
   }
 
+  // save the notification details in the database
   db.prepare(
     `
     INSERT INTO notifications (
