@@ -1,12 +1,9 @@
-/* ===========================================================
-   Customer Complaints & Feedback Handling System
-   Design tokens + shared UI
-   =========================================================== */
+/* shared design tokens and styles */
 
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap");
 
 :root {
-  /* Color */
+  /* color palette */
   --ink: #14213d;
   --ink-mid: #24365c;
   --ink-soft: #4e5d7d;
@@ -17,6 +14,7 @@
   --copper: #b4702f;
   --copper-dark: #8f5a24;
 
+  /* complaint status colors */
   --status-open: #b4702f;
   --status-open-bg: #fbede0;
   --status-progress: #3a5a99;
@@ -26,7 +24,7 @@
   --status-closed: #6b7280;
   --status-closed-bg: #e9eaec;
 
-  /* Type */
+  /* font styles */
   --font-head: "Fraunces", Georgia, serif;
   --font-body: "IBM Plex Sans", -apple-system, sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
@@ -38,6 +36,7 @@
   box-sizing: border-box;
 }
 
+/* set the default page styles */
 body {
   margin: 0;
   font-family: var(--font-body);
@@ -55,18 +54,22 @@ h3 {
   margin: 0;
   color: var(--ink);
 }
+
 h1 {
   font-size: 2.6rem;
   line-height: 1.12;
   letter-spacing: -0.01em;
 }
+
 h2 {
   font-size: 1.6rem;
   line-height: 1.2;
 }
+
 h3 {
   font-size: 1.15rem;
 }
+
 p {
   margin: 0 0 1rem;
   max-width: 62ch;
@@ -77,8 +80,7 @@ a {
   color: var(--copper-dark);
 }
 
-/* ---------- Layout shells ---------- */
-
+/* top navigation and page layout */
 .topbar {
   display: flex;
   align-items: center;
@@ -87,6 +89,7 @@ a {
   background: var(--ink);
   color: #fff;
 }
+
 .brand {
   display: flex;
   align-items: baseline;
@@ -94,6 +97,7 @@ a {
   color: #fff;
   text-decoration: none;
 }
+
 .brand .mark {
   width: 30px;
   height: 30px;
@@ -105,11 +109,13 @@ a {
   font-family: var(--font-head);
   font-size: 0.95rem;
 }
+
 .brand .name {
   font-family: var(--font-head);
   font-size: 1.05rem;
   letter-spacing: 0.01em;
 }
+
 .brand .name small {
   display: block;
   font-family: var(--font-body);
@@ -124,29 +130,35 @@ a {
   gap: 28px;
   align-items: center;
 }
+
 .topnav a {
   color: #c9d2e4;
   text-decoration: none;
   font-size: 0.92rem;
 }
+
 .topnav a:hover,
 .topnav a.active {
   color: #fff;
 }
+
 .topnav .divider {
   width: 1px;
   height: 16px;
   background: #3c4c70;
 }
 
+/* control the page width */
 .shell {
   max-width: 1080px;
   margin: 0 auto;
   padding: 56px 40px 80px;
 }
+
 .shell.narrow {
   max-width: 640px;
 }
+
 .shell.wide {
   max-width: 1240px;
 }
@@ -155,12 +167,15 @@ a {
   display: flex;
   min-height: calc(100vh - 66px);
 }
+
+/* sidebar navigation */
 .sidebar {
   width: 220px;
   background: var(--ink);
   padding: 28px 0;
   flex-shrink: 0;
 }
+
 .sidebar a {
   display: block;
   padding: 10px 26px;
@@ -169,11 +184,13 @@ a {
   font-size: 0.9rem;
   border-left: 2px solid transparent;
 }
+
 .sidebar a.active {
   color: #fff;
   border-left-color: var(--copper);
   background: rgba(255, 255, 255, 0.04);
 }
+
 .sidebar .section-label {
   padding: 4px 26px 8px;
   font-size: 0.7rem;
@@ -182,6 +199,8 @@ a {
   letter-spacing: 0.08em;
   margin-top: 18px;
 }
+
+/* main content area */
 .main-pane {
   flex: 1;
   padding: 40px 44px;
@@ -197,7 +216,7 @@ footer.site-footer {
   justify-content: space-between;
 }
 
-/* ---------- Eyebrow / meta ---------- */
+/* small heading text */
 .eyebrow {
   font-size: 0.8rem;
   color: var(--copper-dark);
@@ -205,7 +224,7 @@ footer.site-footer {
   margin-bottom: 10px;
 }
 
-/* ---------- Buttons ---------- */
+/* button styles */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -222,42 +241,50 @@ footer.site-footer {
     background 0.15s ease,
     border-color 0.15s ease;
 }
+
 .btn-primary {
   background: var(--copper);
   color: #fff;
 }
+
 .btn-primary:hover {
   background: var(--copper-dark);
 }
+
 .btn-secondary {
   background: transparent;
   color: var(--ink);
   border-color: var(--line);
 }
+
 .btn-secondary:hover {
   border-color: var(--ink-soft);
 }
+
 .btn-ghost {
   background: transparent;
   color: var(--ink-mid);
   padding: 11px 8px;
 }
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
 .btn-block {
   width: 100%;
   justify-content: center;
 }
 
-/* ---------- Cards / panels (used sparingly, hairline not shadow) ---------- */
+/* panels and option cards */
 .panel {
   background: var(--paper-raise);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 28px 30px;
 }
+
 .option-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -266,29 +293,34 @@ footer.site-footer {
   border: 1px solid var(--line);
   margin-top: 40px;
 }
+
 .option-card {
   background: var(--paper-raise);
   padding: 30px 26px;
 }
+
 .option-card .num {
   font-family: var(--font-mono);
   font-size: 0.78rem;
   color: var(--copper-dark);
 }
+
 .option-card h3 {
   margin: 12px 0 8px;
 }
+
 .option-card p {
   font-size: 0.9rem;
   margin-bottom: 18px;
 }
+
 .option-card a {
   font-size: 0.88rem;
   font-weight: 600;
   text-decoration: none;
 }
 
-/* ---------- Forms ---------- */
+/* form fields */
 .field {
   margin-bottom: 22px;
 }
@@ -347,7 +379,7 @@ footer.site-footer {
   color: var(--ink-mid);
 }
 
-/* ---------- Status badges ---------- */
+/* complaint status badges */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -382,7 +414,7 @@ footer.site-footer {
   color: var(--status-closed);
 }
 
-/* ---------- Stepper (complaint lifecycle — genuinely sequential) ---------- */
+/* complaint lifecycle progress */
 .stepper {
   display: flex;
   margin: 34px 0 8px;
@@ -416,7 +448,7 @@ footer.site-footer {
   margin-top: 2px;
 }
 
-/* ---------- Reference tag (hero motif) ---------- */
+/* complaint reference display */
 .ref-tag {
   font-family: var(--font-mono);
   display: inline-block;
@@ -432,7 +464,7 @@ footer.site-footer {
   color: var(--copper-dark);
 }
 
-/* ---------- Table ---------- */
+/* data tables */
 table.data-table {
   width: 100%;
   border-collapse: collapse;
@@ -464,7 +496,7 @@ table.data-table tr:hover td {
   color: var(--ink-soft);
 }
 
-/* ---------- Stat tiles ---------- */
+/* dashboard statistics */
 .stat-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -488,7 +520,7 @@ table.data-table tr:hover td {
   margin-top: 4px;
 }
 
-/* ---------- Utility ---------- */
+/* reusable layout helpers */
 .flex-between {
   display: flex;
   justify-content: space-between;
@@ -531,6 +563,7 @@ table.data-table tr:hover td {
   color: var(--ink-mid);
 }
 
+/* adjust the layout for smaller screens */
 @media (max-width: 780px) {
   .option-grid,
   .stat-row,
