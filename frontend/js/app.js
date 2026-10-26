@@ -1,5 +1,4 @@
-/* Page logic. Talks to the Express API via api.js (js/api.js
-   must be loaded first on any page that uses this file).*/
+/* page logic for interacting with the express api */
 
 const CATEGORIES = [
   "Loan disbursement delay",
@@ -12,9 +11,10 @@ const CATEGORIES = [
 
 const STATUSES = ["Open", "In Progress", "Resolved", "Closed"];
 
-// to avoid multiple timers being created every time mark as read is clicked
+// prevent multiple refresh timers from being created
 let notificationRefreshTimer = null;
 
+// return the badge style for each complaint status
 function statusBadgeClass(status) {
   return (
     {
@@ -26,10 +26,12 @@ function statusBadgeClass(status) {
   );
 }
 
+// get the position of a status in the complaint lifecycle
 function stepIndex(status) {
   return STATUSES.indexOf(status);
 }
 
+// format dates for display
 function formatDate(iso) {
   if (!iso) return "";
   return new Date(iso).toLocaleString("en-GB", {
@@ -41,6 +43,7 @@ function formatDate(iso) {
   });
 }
 
+// display an error message inside a form
 function showFormError(container, message) {
   let el = container.querySelector(".form-error");
   if (!el) {
@@ -53,12 +56,13 @@ function showFormError(container, message) {
   el.textContent = message;
 }
 
-/* -------- Raise complaint form -------- */
+/* raise complaint form */
 function initRaiseComplaintForm() {
   const form = document.getElementById("complaint-form");
   const confirmPanel = document.getElementById("confirmation-panel");
   if (!form) return;
 
+  // populate the category dropdown
   const catSelect = document.getElementById("category");
   CATEGORIES.forEach((c) => {
     const opt = document.createElement("option");
@@ -71,6 +75,7 @@ function initRaiseComplaintForm() {
     e.preventDefault();
     const submitBtn = form.querySelector('button[type="submit"]');
 
+    // collect and validate the form values
     const payload = {
       name: document.getElementById("full-name").value.trim(),
       nrc: document.getElementById("nrc-number").value.trim(),
@@ -88,12 +93,14 @@ function initRaiseComplaintForm() {
     )
       return;
 
+    // prevent duplicate submissions while the request is processing
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting…";
 
     try {
       const { complaint } = await api.raiseComplaint(payload);
 
+      // show the confirmation panel after successful submission
       form.classList.add("hidden");
       confirmPanel.classList.remove("hidden");
 
@@ -112,7 +119,7 @@ function initRaiseComplaintForm() {
   });
 }
 
-// for notifications on the staff/assigner dashboard
+// load notifications for staff and assigners
 async function initNotifications() {
   const notificationList = document.getElementById("notifications-list");
 
@@ -122,6 +129,7 @@ async function initNotifications() {
 
   const sidebarCountEl = document.getElementById("sidebar-notification-count");
 
+  // update the sidebar count when the notification list is not present
   if (!notificationList) {
     try {
       const unread = await api.getUnreadNotificationCount();
@@ -152,6 +160,7 @@ async function initNotifications() {
       sidebarCountEl.style.display = unread.count > 0 ? "inline-block" : "none";
     }
 
+    // show a message when there are no notifications
     if (!notifications.length) {
       notificationList.innerHTML = `
         <p style="font-size:0.86rem; color:var(--ink-soft);">
@@ -164,7 +173,7 @@ async function initNotifications() {
 
     notificationList.innerHTML = "";
 
-    // render the first 5 notifications in the list
+    // display the five most recent notifications
     notifications.slice(0, 5).forEach((notification) => {
       const item = document.createElement("div");
 
@@ -245,6 +254,7 @@ async function initNotifications() {
       notificationList.appendChild(item);
     });
 
+    // mark notifications as read when their buttons are clicked
     document.querySelectorAll(".notification-read-btn").forEach((button) => {
       button.addEventListener("click", async () => {
         const id = button.dataset.id;
@@ -267,20 +277,22 @@ async function initNotifications() {
       </p>
     `;
   }
+}
 
-  // to refresh after 30 seconds because new notifications only show after reload
+ // refresh notifications every 30 seconds
   if (notificationRefreshTimer) {
     clearTimeout(notificationRefreshTimer);
   }
 
   notificationRefreshTimer = setTimeout(initNotifications, 30000);
-}
+//}
 
-// Track complaint page
+// track complaint page
 function initTrackComplaint() {
   const form = document.getElementById("track-form");
   if (!form) return;
 
+  // load a reference from the url if provided
   const params = new URLSearchParams(window.location.search);
   const preset = params.get("ref");
   if (preset) {
@@ -308,6 +320,7 @@ async function renderTrackResult(ref) {
     return;
   }
 
+  // display the complaint details
   notFound.classList.add("hidden");
   result.classList.remove("hidden");
 
@@ -320,6 +333,7 @@ async function renderTrackResult(ref) {
   document.getElementById("res-badge").className =
     "badge " + statusBadgeClass(complaint.status);
 
+  // update the progress steps to match the complaint status
   const curr = stepIndex(complaint.status);
   document.querySelectorAll("#stepper .step").forEach((el, i) => {
     el.classList.remove("done", "current");
@@ -327,6 +341,7 @@ async function renderTrackResult(ref) {
     if (i === curr) el.classList.add("current");
   });
 
+  // show the complaint status history
   const timeline = document.getElementById("timeline");
   timeline.innerHTML = "";
   complaint.log
@@ -341,7 +356,7 @@ async function renderTrackResult(ref) {
     });
 }
 
-// Login page
+// login page
 function initLoginPage() {
   const form = document.getElementById("login-form");
   if (!form) return;
@@ -354,6 +369,7 @@ function initLoginPage() {
       const { token, user } = await api.login(email, password);
       setSession(token, user);
 
+      // redirect users to the dashboard for their role
       if (user.role === "admin") {
         window.location.href = "admin-dashboard.html";
       } else if (user.role === "assigner") {
@@ -367,7 +383,7 @@ function initLoginPage() {
   });
 }
 
-// My Assigned Cases page
+// my assigned cases page
 async function initMyAssignedCases() {
   const tbody = document.getElementById("assigned-cases-tbody");
 
@@ -381,6 +397,7 @@ async function initMyAssignedCases() {
     el.textContent = `${user.name} — Staff`;
   });
 
+  // load and display cases assigned to the current staff member
   async function renderAssignedCases() {
     try {
       const status = document.getElementById(
@@ -420,6 +437,7 @@ async function initMyAssignedCases() {
         tbody.appendChild(tr);
       });
 
+      // update the assigned case statistics
       document.getElementById("stat-open").textContent =
         complaints.filter((c) => c.status === "Open").length;
 
@@ -436,6 +454,7 @@ async function initMyAssignedCases() {
     }
   }
 
+  // load the details and history of a selected case
   async function openAssignedCaseDetail(id) {
     try {
       const { complaint: c } = await api.getComplaint(id);
@@ -482,6 +501,7 @@ async function initMyAssignedCases() {
 
       document.getElementById("d-note").value = "";
 
+      // display the case history in reverse chronological order
       const log = document.getElementById("d-log");
 
       log.innerHTML = "";
@@ -532,6 +552,7 @@ async function initMyAssignedCases() {
           });
       }
 
+      // save status changes and notes for the selected case
       const form = document.getElementById("detail-form");
 
       form.onsubmit = async function (e) {
@@ -576,6 +597,7 @@ async function initMyAssignedCases() {
     }
   }
 
+  // refresh the list when the status filter changes
   document
     .getElementById("assigned-filter-status")
     .addEventListener("change", () => renderAssignedCases());
@@ -594,7 +616,7 @@ async function initMyAssignedCases() {
   await renderAssignedCases();
 }
 
-// Staff dashboard
+// staff dashboard
 async function initStaffDashboard() {
   const tbody = document.getElementById("complaints-tbody");
   if (!tbody) return;
@@ -605,6 +627,7 @@ async function initStaffDashboard() {
     el.textContent = `${user.name} — ${user.branch || "Staff"}`;
   });
 
+  // populate the category filter
   const catFilter = document.getElementById("filter-category");
   CATEGORIES.forEach((c) => {
     const opt = document.createElement("option");
@@ -613,6 +636,7 @@ async function initStaffDashboard() {
     catFilter.appendChild(opt);
   });
 
+    // load complaints using the selected filters
   async function render(assignedTo = null) {
     const status = document.getElementById("filter-status").value;
     const category = document.getElementById("filter-category").value;
@@ -640,6 +664,7 @@ async function initStaffDashboard() {
       tbody.appendChild(tr);
     });
 
+    // update the dashboard statistics
     document.getElementById("stat-open").textContent = complaints.filter(
       (c) => c.status === "Open",
     ).length;
@@ -652,6 +677,7 @@ async function initStaffDashboard() {
     document.getElementById("stat-total").textContent = complaints.length;
   }
 
+  // refresh the table when a filter changes
   document
     .getElementById("filter-status")
     .addEventListener("change", () => render());
@@ -659,6 +685,8 @@ async function initStaffDashboard() {
     .getElementById("filter-category")
     .addEventListener("change", () => render());
   render();
+
+  // allow other functions to refresh the staff table
   window.__renderStaffTable = render;
 
   const signOut = document.getElementById("sign-out");
@@ -670,6 +698,7 @@ async function initStaffDashboard() {
     });
 }
 
+// display details for a selected complaint
 async function openDetail(id) {
   const { complaint: c } = await api.getComplaint(id);
 
@@ -690,6 +719,7 @@ async function openDetail(id) {
 
   document.getElementById("d-status-select").value = c.status;
 
+  // display the complaint history
   const log = document.getElementById("d-log");
   log.innerHTML = "";
 
@@ -714,6 +744,7 @@ async function openDetail(id) {
       log.appendChild(div);
     });
 
+  // handle complaint status updates and notes
   const form = document.getElementById("detail-form");
 
   form.onsubmit = async function (e) {
@@ -736,6 +767,7 @@ async function openDetail(id) {
 
       await openDetail(id);
 
+      // refresh the table after the update
       if (window.__renderStaffTable) {
         window.__renderStaffTable();
       }
@@ -772,6 +804,7 @@ function initAdminDashboard() {
   loadComplianceSummary();
 }
 
+// load complaint statistics and compliance thresholds
 async function loadComplianceSummary() {
   const data = await api.reportSummary();
   document.getElementById("admin-total").textContent = data.total;
@@ -779,6 +812,7 @@ async function loadComplianceSummary() {
   document.getElementById("admin-resolved").textContent = data.resolvedOrClosed;
   document.getElementById("admin-rate").textContent = data.resolutionRate + "%";
 
+  // scale category bars against the highest complaint count
   const maxCount = Math.max(...data.byCategory.map((c) => c.count), 1);
   const barsEl = document.getElementById("category-bars");
   barsEl.innerHTML = "";
@@ -820,6 +854,7 @@ function initAdminUsers() {
   const cancelBtn = document.getElementById("cancel-user-btn");
   const form = document.getElementById("user-form");
 
+  // display an error message in the given container
   const showError = (container, message) => {
     container.innerHTML = "";
     const error = document.createElement("div");
@@ -830,6 +865,7 @@ function initAdminUsers() {
     container.appendChild(error);
   };
 
+  // load and display user accounts
   async function renderUsers() {
     try {
       const { users } = await api.listUsers();
@@ -863,6 +899,7 @@ function initAdminUsers() {
         tbody.appendChild(tr);
       });
 
+      // handle account suspension and reactivation
       tbody.querySelectorAll(".toggle-user-status").forEach((link) => {
         link.addEventListener("click", async (e) => {
           e.preventDefault();
@@ -884,17 +921,20 @@ function initAdminUsers() {
     }
   }
 
+  // show the form for adding a user
   addBtn.addEventListener("click", () => {
     formContainer.classList.remove("hidden");
     document.getElementById("user-name").focus();
   });
 
+  // close the form and clear its fields
   cancelBtn.addEventListener("click", () => {
     form.reset();
     formContainer.classList.add("hidden");
     document.getElementById("user-form-error").innerHTML = "";
   });
 
+  // create a new user account
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -932,14 +972,17 @@ function initAdminUsers() {
   renderUsers();
 }
 
+// export compliance data as a csv file
 function exportComplianceReport(data) {
   const rows = [];
 
+  // escape values so they can be used safely in csv fields
   const escapeCsv = (value) => {
     const text = String(value ?? "");
     return `"${text.replace(/"/g, '""')}"`;
   };
 
+  // add the report summary
   rows.push(["Compliance Report", "", "", ""]);
 
   rows.push(["Report date", new Date().toLocaleDateString(), "", ""]);
@@ -968,6 +1011,7 @@ function exportComplianceReport(data) {
 
   rows.push([]);
 
+  // add complaint counts by category
   rows.push(["Complaints by category", "Count", "", ""]);
 
   data.byCategory.forEach((item) => {
@@ -976,6 +1020,7 @@ function exportComplianceReport(data) {
 
   rows.push([]);
 
+  // add complaints with overdue acknowledgements
   rows.push(["Overdue acknowledgement", "", "", ""]);
 
   rows.push(["Reference", "Submitted", "", ""]);
@@ -986,6 +1031,7 @@ function exportComplianceReport(data) {
 
   rows.push([]);
 
+  // add complaints with overdue resolutions
   rows.push(["Overdue resolution", "", "", ""]);
 
   rows.push(["Reference", "Status", "Submitted", ""]);
@@ -994,6 +1040,7 @@ function exportComplianceReport(data) {
     rows.push([item.reference, item.status, formatDate(item.submitted_at), ""]);
   });
 
+  // convert the rows into csv text
   const csv = rows.map((row) => row.map(escapeCsv).join(",")).join("\n");
 
   const blob = new Blob([csv], {
@@ -1002,6 +1049,7 @@ function exportComplianceReport(data) {
 
   const url = URL.createObjectURL(blob);
 
+  // create a temporary link to download the report
   const link = document.createElement("a");
 
   link.href = url;
