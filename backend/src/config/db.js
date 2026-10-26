@@ -1,3 +1,4 @@
+
 // database connection and schema 
 const path = require("path");
 const fs = require("fs");
@@ -106,8 +107,7 @@ if (hasServiceNumber && !hasNrcNumber) {
   `);
 }
 
-// Migrate existing databases to support the assigner role
-// and repair foreign-key references created during the users migration.
+// migrate existing databases to support the assigner role and repair foreign-key references created during the users migration.
 const userTableSql = db
   .prepare(
     "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'users'",
@@ -132,7 +132,7 @@ if (
       ALTER TABLE users RENAME TO users_old;
     `);
 
-    // Recreate users with the assigner role.
+    // recreate users with the assigner role.
     db.exec(`
       CREATE TABLE users (
         id             INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -169,7 +169,7 @@ if (
       FROM users_old;
     `);
 
-    // Recreate complaints with the correct users foreign key.
+    // recreate complaints with the correct users foreign key.
     db.exec(`
       CREATE TABLE complaints (
         id             INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -224,7 +224,7 @@ if (
       FROM complaints_old;
     `);
 
-    // Recreate complaint logs.
+    // recreate complaint logs.
     db.exec(`
       CREATE TABLE complaint_logs (
         id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -254,7 +254,7 @@ if (
       FROM complaint_logs_old;
     `);
 
-    // Recreate notifications.
+    // recreate notifications.
     db.exec(`
       CREATE TABLE notifications (
         id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -291,7 +291,7 @@ if (
       FROM notifications_old;
     `);
 
-    // Recreate notification settings.
+    // recreate notification settings.
     db.exec(`
       CREATE TABLE notification_settings (
         id                    INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -324,7 +324,7 @@ if (
       FROM notification_settings_old;
     `);
 
-    // Remove the temporary tables.
+    // remove the temporary tables.
     db.exec(`
       DROP TABLE notification_settings_old;
       DROP TABLE notifications_old;
